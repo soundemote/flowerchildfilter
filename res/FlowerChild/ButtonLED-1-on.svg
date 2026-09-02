@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="33.8" height="33.8" viewBox="0 0 33.47 33.47">
+  <defs>
+    <linearGradient id="linear-gradient" x1="16.73" y1="29.6" x2="16.73" y2="3.87" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-opacity="0"/>
+      <stop offset="1" stop-color="#e91127" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="16.73" y1="17.23" x2="16.73" y2="6.63" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#e9e9e9" stop-opacity="0.5"/>
+    </linearGradient>
+  </defs>
+  <circle id="reflex" cx="16.73" cy="16.73" r="12.86" fill="url(#linear-gradient)"/>
+  <circle id="base" cx="16.73" cy="16.73" r="12.19" fill="#0a0a0a"/>
+  <g id="Glow">
+    <circle id="red" cx="16.73" cy="16.73" r="16.73" fill="#b80d1e" opacity="0.1"/>
+    <circle id="red-2" data-name="red" cx="16.73" cy="16.73" r="15.69" fill="#b80d1e" opacity="0.1"/>
+    <circle id="red-3" data-name="red" cx="16.73" cy="16.73" r="14.46" fill="#b80d1e" opacity="0.1"/>
+  </g>
+  <circle id="ouside" cx="16.73" cy="16.73" r="11.34" fill="#b80d1e"/>
+  <circle id="top" cx="16.73" cy="16.73" r="10.11" fill="#e91127"/>
+  <path d="M16.73,7.63a10.11,10.11,0,0,1,10.09,9.6c0-.16,0-.33,0-.5a10.11,10.11,0,0,0-20.21,0c0,.17,0,.34,0,.5A10.1,10.1,0,0,1,16.73,7.63Z" fill="url(#linear-gradient-2)"/>
+  <g id="light">
+    <circle cx="16.73" cy="16.73" r="7.31" fill="#fff" opacity="0.2"/>
+    <circle cx="16.73" cy="16.73" r="4.97" fill="#fff" opacity="0.2"/>
+    <circle cx="16.73" cy="16.73" r="3.32" fill="#fff" opacity="0.2"/>
+    <circle cx="16.73" cy="16.73" r="1.82" fill="#fff" opacity="0.2"/>
+  </g>
+  <path d="M16.73,25.89a9,9,0,0,0,6.75-3c1.43-1.75.37-1.56-.71-.65a11,11,0,0,1-6,2.29,9.67,9.67,0,0,1-6.82-3.07c-.61-.61-1.25-.37-.77.35A9.19,9.19,0,0,0,16.73,25.89Z" fill="#d40d1e"/>
+</svg>

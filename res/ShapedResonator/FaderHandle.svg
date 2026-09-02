@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="17" height="10.2015" viewBox="0 0 23.33 14"><g transform="translate(23.33,0) rotate(90) translate(-0,-0)">
+  <defs>
+    
+    <linearGradient id="linear-gradient" x1="7" y1="2.95" x2="7" y2="11.03" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2b2b2b"/>
+      <stop offset="1" stop-color="#424242"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="7" y1="10.96" x2="7" y2="13.98" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#262626"/>
+      <stop offset="1" stop-color="#3d3d3d"/>
+    </linearGradient>
+  </defs>
+  <path d="M8.52,23.33h-2.75c-1.92,0-3.56-1.14-3.88-2.7L0,11.52h14l-1.58,9.03c-.28,1.6-1.94,2.78-3.9,2.78Z" style="fill-rule:evenodd;opacity:.15"/>
+  <path d="M8.4,21.43h-2.54c-1.77,0-3.29-1.14-3.59-2.7L.53,9.62h12.94l-1.46,9.03c-.26,1.6-1.79,2.78-3.6,2.78Z" style="fill-rule:evenodd;opacity:.15"/>
+  <path d="M8.34,18.8h-2.42c-1.69,0-3.14-1.14-3.42-2.7L.83,6.99h12.33l-1.39,9.03c-.25,1.6-1.71,2.78-3.43,2.78Z" style="fill-rule:evenodd;opacity:.15"/>
+  <path d="M8.21,16.35h-2.2c-1.53,0-2.84-1.14-3.1-2.7L1.4,4.54h11.19l-1.26,9.03c-.22,1.6-1.55,2.78-3.11,2.78Z" style="fill-rule:evenodd;opacity:.15"/>
+  <rect width="14" height="2.95" style="fill:gray"/>
+  <rect y="2.95" width="14" height="8.07" style="fill:url(#linear-gradient)"/>
+  <rect y="10.96" width="14" height="3.02" style="fill:url(#linear-gradient-2)"/>
+  <rect x=".53" y="6.3" width="12.94" height="1.37" style="fill:#ccc"/>
+  <rect x=".53" y="6.02" width="12.94" height=".28" style="fill:#5e5e5e"/>
+  <rect x=".53" y="7.68" width="12.94" height=".28" style="fill:#fff"/>
+  <rect y="13.98" width="14" height=".43" style="fill:#0d0d0d"/>
+</g></svg>

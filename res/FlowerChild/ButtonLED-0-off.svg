@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="26" height="26" viewBox="0 0 25.72 25.72">
+  <defs>
+    <linearGradient id="linear-gradient" x1="16.73" y1="29.6" x2="16.73" y2="3.87" gradientTransform="translate(29.6 29.6) rotate(180)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-opacity="0"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="12.86" y1="24.2" x2="12.86" y2="1.52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#545454"/>
+      <stop offset="1" stop-color="#c2c2c2"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-3" x1="12.86" y1="22.97" x2="12.86" y2="2.75" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8c8c8c"/>
+      <stop offset="1" stop-color="#4f4f4f"/>
+    </linearGradient>
+  </defs>
+  <circle id="reflex" cx="12.86" cy="12.86" r="12.86" fill="url(#linear-gradient)"/>
+  <circle id="base" cx="12.86" cy="12.86" r="12.19" fill="#0a0a0a"/>
+  <circle id="ouside" cx="12.86" cy="12.86" r="11.34" fill="url(#linear-gradient-2)"/>
+  <circle id="top" cx="12.86" cy="12.86" r="10.11" fill="url(#linear-gradient-3)"/>
+  <path d="M16.73,7.63a10.11,10.11,0,0,1,10.09,9.6c0-.16,0-.33,0-.5a10.11,10.11,0,0,0-20.21,0c0,.17,0,.34,0,.5A10.1,10.1,0,0,1,16.73,7.63Z" transform="translate(-3.87 -3.87)" fill="#fff" opacity="0.77"/>
+  <path d="M16.73,25.89a9,9,0,0,0,6.75-3c1.43-1.75.37-1.56-.71-.65s-4.06-4.88-6.38-4.88c-2.72,0-4.7,5.88-6.48,4.1-.61-.61-1.25-.37-.77.35A9.19,9.19,0,0,0,16.73,25.89Z" transform="translate(-3.87 -3.87)" fill="#b5b5b5"/>
+</svg>

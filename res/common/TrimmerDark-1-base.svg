@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="20" height="20" viewBox="0 0 25.51 25.51">
+  <defs>
+    <linearGradient id="linear-gradient" x1="12.76" y1="25.51" x2="12.76" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-opacity="0"/>
+      <stop offset="1"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="12.76" y1="1.26" x2="12.76" y2="24.26" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#858585"/>
+      <stop offset="1" stop-color="#242424"/>
+    </linearGradient>
+  </defs>
+  <circle id="bevel" cx="12.76" cy="12.76" r="12.76" opacity="0.4" fill="url(#linear-gradient)"/>
+  <ellipse cx="12.76" cy="12.76" rx="11.59" ry="11.5" fill="url(#linear-gradient-2)"/>
+</svg>

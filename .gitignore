@@ -1,0 +1,24 @@
+# Build output
+build/
+dep/
+dist/
+plugin.dll
+plugin.so
+plugin.dylib
+
+# Test binary (tests/ sources themselves are tracked)
+tests/test_dsp
+tests/test_dsp.exe
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# NOTE: res/ is deliberately NOT ignored.
+# tools/prepare_assets.py generates it from "../image assets/", which lives
+# OUTSIDE this repository. If res/ were ignored, a fresh clone could not be
+# built at all. It is only ~1.4 MB, so it is committed.

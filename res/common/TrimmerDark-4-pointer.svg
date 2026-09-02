@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1.7" height="6.2" viewBox="0 0 2.21 8.06">
+  <rect id="pointer_2" data-name="pointer 2" width="2.21" height="1.49" fill="#adadad"/>
+  <path id="pointer-2" data-name="pointer" d="M0,1.49H2.21a0,0,0,0,1,0,0v6.1a.47.47,0,0,1-.47.47H.47A.47.47,0,0,1,0,7.59V1.49A0,0,0,0,1,0,1.49Z" fill="#dbdbdb"/>
+</svg>
