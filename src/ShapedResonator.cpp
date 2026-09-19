@@ -1,4 +1,5 @@
 #include "plugin.hpp"
+#include "ShapedResonatorFilter.hpp"
 #include "FmdDsp.hpp"
 #include "FmdWidgets.hpp"
 
@@ -47,10 +48,7 @@ struct ShapedResonator : Module {
 		OUTPUTS_LEN
 	};
 
-	/** The three shape buttons pick the resonator response. */
-	static const int SHAPE_MODES[3];
-
-	fmd::FilterCore core;
+	fmd::shaped_resonator::Core core;
 
 	ShapedResonator() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, 0);
@@ -59,7 +57,7 @@ struct ShapedResonator : Module {
 		configParam(RES_PARAM, 0.f, 1.f, 0.5f, "Resonance", "%", 0.f, 100.f);
 		configParam(CRUNCH_PARAM, 0.f, 1.f, 0.35f, "Crunch", "%", 0.f, 100.f);
 		configParam(DRIVE_PARAM, 0.f, 1.f, 0.35f, "Drive", "%", 0.f, 100.f);
-		configParam(SPREAD_PARAM, 0.f, 1.f, 0.f, "Spread", "%", 0.f, 100.f);
+		configParam(SPREAD_PARAM, -1.f, 1.f, 0.f, "Spread", "%", 0.f, 100.f);
 		configParam(CLIP_PARAM, 0.f, 1.f, 0.25f, "Clip", "%", 0.f, 100.f);
 		configSwitch(SHAPE_PARAM, 0.f, 2.f, 0.f, "Shape", {"Band", "Low", "High"});
 
@@ -97,21 +95,17 @@ struct ShapedResonator : Module {
 	void process(const ProcessArgs& args) override {
 		core.setSampleRate(args.sampleRate);
 
-		fmd::FilterParams p;
-		p.freqHz = fmd::freqFromOctaves(
-			params[FREQ_PARAM].getValue(),
-			inputs[FREQ_INPUT].isConnected()
-				? inputs[FREQ_INPUT].getVoltage() * params[FREQ_CV_PARAM].getValue()
-				: 0.f);
-		p.res = fmd::modulated(params[RES_PARAM].getValue(), inputs[RES_INPUT], params[RES_CV_PARAM].getValue());
-		p.grit = fmd::modulated(params[CRUNCH_PARAM].getValue(), inputs[CRUNCH_INPUT], params[CRUNCH_CV_PARAM].getValue());
-		p.drive = fmd::modulated(params[DRIVE_PARAM].getValue(), inputs[DRIVE_INPUT], params[DRIVE_CV_PARAM].getValue());
-		p.spread = fmd::modulated(params[SPREAD_PARAM].getValue(), inputs[SPREAD_INPUT], params[SPREAD_CV_PARAM].getValue());
-		p.clip = params[CLIP_PARAM].getValue();
-		p.gritIsCrunch = true;
+		float freqNorm = clamp(params[FREQ_PARAM].getValue() / 10.f, 0.f, 1.f);
+		if (inputs[FREQ_INPUT].isConnected())
+			freqNorm = clamp(freqNorm + inputs[FREQ_INPUT].getVoltage() * 0.1f * params[FREQ_CV_PARAM].getValue(), 0.f, 1.f);
 
+		float res = fmd::modulated(params[RES_PARAM].getValue(), inputs[RES_INPUT], params[RES_CV_PARAM].getValue());
+		float crunch = fmd::modulated(params[CRUNCH_PARAM].getValue(), inputs[CRUNCH_INPUT], params[CRUNCH_CV_PARAM].getValue());
+		float drive = fmd::modulated(params[DRIVE_PARAM].getValue(), inputs[DRIVE_INPUT], params[DRIVE_CV_PARAM].getValue());
+		float spread = fmd::modulatedBipolar(params[SPREAD_PARAM].getValue(), inputs[SPREAD_INPUT], params[SPREAD_CV_PARAM].getValue());
+		float clip = params[CLIP_PARAM].getValue();
 		int shape = clamp((int) std::round(params[SHAPE_PARAM].getValue()), 0, 2);
-		p.mode = SHAPE_MODES[shape];
+		auto mode = (fmd::shaped_resonator::Mode) shape;
 
 		float left = inputs[IN_L_INPUT].getVoltage();
 		float in[2] = {
@@ -119,20 +113,14 @@ struct ShapedResonator : Module {
 			inputs[IN_R_INPUT].isConnected() ? inputs[IN_R_INPUT].getVoltage() : left,
 		};
 		float out[2] = {0.f, 0.f};
-		core.process(in, out, p);
+		core.process(in, out, freqNorm, res, crunch, drive, spread, clip, mode);
 
 		outputs[OUT_L_OUTPUT].setVoltage(out[0]);
 		outputs[OUT_R_OUTPUT].setVoltage(out[1]);
 	}
 };
 
-// Icon 1 is a band-pass bell, icon 2 a rising low shelf, icon 3 a falling high
-// shelf, matching the glyphs printed on the three buttons.
-const int ShapedResonator::SHAPE_MODES[3] = {
-	fmd::FilterCore::MODE_BP,
-	fmd::FilterCore::MODE_LP12,
-	fmd::FilterCore::MODE_HP,
-};
+// Shape buttons 0/1/2 select Sinusoid / Triangle / Sawtooth resonators.
 
 
 // ---------------------------------------------------------------------------

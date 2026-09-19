@@ -1,8 +1,12 @@
 #include "plugin.hpp"
+#include "SuperLoveFilter.hpp"
 #include "FmdDsp.hpp"
 #include "FmdWidgets.hpp"
 
-/*  Super Love -- 12 HP stereo LP6 / LP12 / BP / HP filter.
+/*  Super Love -- 12 HP stereo LP18 / LP24 / BP / HP filter (Superlove Rev2 DSP).
+
+    Chaos is fixed at 0 (no Chaos control). Panel NOISE → Rev2 noise inject
+    (0…1 knob maps to 0…2 amplitude).
 
     Control positions come from
     `image assets/Super Love/260731 Super Potions.svg` (716 x 1518, i.e. 4x the
@@ -19,7 +23,7 @@ struct SuperLove : Module {
 		DRIVE_PARAM,
 		SPREAD_PARAM,
 		MODE_PARAM,
-		CLIP_PARAM,
+		CLIP_PARAM, // kept for patch param-ID stability; unused (clip is LED-only)
 		RES_CV_PARAM,
 		NOISE_CV_PARAM,
 		FREQ_CV_PARAM,
@@ -42,21 +46,31 @@ struct SuperLove : Module {
 		OUT_R_OUTPUT,
 		OUTPUTS_LEN
 	};
+	enum LightId {
+		CLIP_LIGHT,
+		LIGHTS_LEN
+	};
 
-	fmd::FilterCore core;
+	fmd::super_love::Core core;
+	/** Clip indicator envelope 1→0, linear decay over clipLightSlewSec. */
+	float clipLightEnv = 0.f;
+	// Output clip light: 10 V peak-to-peak ⇒ |sample| > 5 V on a bipolar out.
+	static constexpr float clipLightThresh = 5.f;
+	static constexpr float clipLightSlewSec = 0.1f;
 
 	SuperLove() {
-		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, 0);
+		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 
 		configParam(FREQ_PARAM, 0.f, 10.f, 6.f, "Frequency", " Hz", 2.f, 20.f);
 		configParam(RES_PARAM, 0.f, 1.f, 0.3f, "Resonance", "%", 0.f, 100.f);
 		configParam(NOISE_PARAM, 0.f, 1.f, 0.f, "Noise", "%", 0.f, 100.f);
-		configParam(DRIVE_PARAM, 0.f, 1.f, 0.25f, "Drive", "%", 0.f, 100.f);
-		configParam(SPREAD_PARAM, 0.f, 1.f, 0.f, "Spread", "%", 0.f, 100.f);
-		configParam(CLIP_PARAM, 0.f, 1.f, 0.25f, "Clip", "%", 0.f, 100.f);
+		configParam(DRIVE_PARAM, 0.5f, 2.f, 1.f, "Drive", "x");
+		configParam(SPREAD_PARAM, -1.f, 1.f, 0.f, "Spread", "%", 0.f, 100.f);
+		// CLIP_PARAM slot retained so later param IDs stay stable; no widget / no soft-clip.
+		configParam(CLIP_PARAM, 0.f, 1.f, 0.f, "Clip");
 
-		// Printed on the panel above the slider, left to right.
-		configSwitch(MODE_PARAM, 0.f, 3.f, 1.f, "Mode", {"LP6", "LP12", "BP", "HP"});
+		// Printed on the panel above the slider, left to right (DSP: LP18/LP24/BP6/HP6).
+		configSwitch(MODE_PARAM, 0.f, 3.f, 1.f, "Mode", {"LP18", "LP24", "BP", "HP"});
 
 		configParam(RES_CV_PARAM, -1.f, 1.f, 0.f, "Resonance CV", "%", 0.f, 100.f);
 		configParam(NOISE_CV_PARAM, -1.f, 1.f, 0.f, "Noise CV", "%", 0.f, 100.f);
@@ -75,6 +89,8 @@ struct SuperLove : Module {
 		configOutput(OUT_L_OUTPUT, "Left audio");
 		configOutput(OUT_R_OUTPUT, "Right audio");
 
+		configLight(CLIP_LIGHT, "Clip");
+
 		configBypass(IN_L_INPUT, OUT_L_OUTPUT);
 		configBypass(IN_R_INPUT, OUT_R_OUTPUT);
 	}
@@ -87,37 +103,67 @@ struct SuperLove : Module {
 	void onReset(const ResetEvent& e) override {
 		Module::onReset(e);
 		core.reset();
+		clipLightEnv = 0.f;
 	}
 
 	void process(const ProcessArgs& args) override {
 		core.setSampleRate(args.sampleRate);
 
-		fmd::FilterParams p;
-		p.freqHz = fmd::freqFromOctaves(
-			params[FREQ_PARAM].getValue(),
-			inputs[FREQ_INPUT].isConnected()
-				? inputs[FREQ_INPUT].getVoltage() * params[FREQ_CV_PARAM].getValue()
-				: 0.f);
-		p.res = fmd::modulated(params[RES_PARAM].getValue(), inputs[RES_INPUT], params[RES_CV_PARAM].getValue());
-		p.grit = fmd::modulated(params[NOISE_PARAM].getValue(), inputs[NOISE_INPUT], params[NOISE_CV_PARAM].getValue());
-		p.drive = fmd::modulated(params[DRIVE_PARAM].getValue(), inputs[DRIVE_INPUT], params[DRIVE_CV_PARAM].getValue());
-		p.spread = fmd::modulated(params[SPREAD_PARAM].getValue(), inputs[SPREAD_INPUT], params[SPREAD_CV_PARAM].getValue());
-		p.clip = params[CLIP_PARAM].getValue();
+		float freqNorm = clamp(params[FREQ_PARAM].getValue() / 10.f, 0.f, 1.f);
+		if (inputs[FREQ_INPUT].isConnected())
+			freqNorm = clamp(freqNorm + inputs[FREQ_INPUT].getVoltage() * 0.1f * params[FREQ_CV_PARAM].getValue(), 0.f, 1.f);
 
-		// The slider positions read LP6, LP12, BP, HP -- the same order as
-		// FilterCore::Mode, so the parameter maps straight through.
-		p.mode = clamp((int) std::round(params[MODE_PARAM].getValue()), 0, fmd::FilterCore::NUM_MODES - 1);
+		float res = fmd::modulated(params[RES_PARAM].getValue(), inputs[RES_INPUT], params[RES_CV_PARAM].getValue());
+		// Panel Noise 0…1 (HP/BP → ±0…0.2 into feedback; LP → ±0…2 into In). Chaos fixed at face 0.
+		float noise01 = fmd::modulated(params[NOISE_PARAM].getValue(), inputs[NOISE_INPUT], params[NOISE_CV_PARAM].getValue());
+		// Drive is 0.5…2.0 (not 0…1) — don't use fmd::modulated (that clamps to 0…1).
+		float drive = params[DRIVE_PARAM].getValue();
+		if (inputs[DRIVE_INPUT].isConnected())
+			drive += inputs[DRIVE_INPUT].getVoltage() * 0.1f * params[DRIVE_CV_PARAM].getValue();
+		drive = clamp(drive, 0.5f, 2.f);
+		float spread = fmd::modulatedBipolar(params[SPREAD_PARAM].getValue(), inputs[SPREAD_INPUT], params[SPREAD_CV_PARAM].getValue());
+		int panelMode = clamp((int) std::round(params[MODE_PARAM].getValue()), 0, 3);
+		auto mode = fmd::super_love::modeFromPanel(panelMode);
 
-		float left = inputs[IN_L_INPUT].getVoltage();
-		float in[2] = {
-			left,
-			inputs[IN_R_INPUT].isConnected() ? inputs[IN_R_INPUT].getVoltage() : left,
-		};
+		// Normal: L (+ optional R). L-only → mono (R in follows L).
+		// R-only → mono via left filter voice; duplicate that out to L and R.
+		const bool leftConn = inputs[IN_L_INPUT].isConnected();
+		const bool rightConn = inputs[IN_R_INPUT].isConnected();
+		float in[2] = {0.f, 0.f};
+		bool monoFromRight = false;
+		if (leftConn && rightConn) {
+			in[0] = inputs[IN_L_INPUT].getVoltage();
+			in[1] = inputs[IN_R_INPUT].getVoltage();
+		} else if (leftConn) {
+			in[0] = in[1] = inputs[IN_L_INPUT].getVoltage();
+		} else if (rightConn) {
+			monoFromRight = true;
+			in[0] = in[1] = inputs[IN_R_INPUT].getVoltage();
+		}
+
 		float out[2] = {0.f, 0.f};
-		core.process(in, out, p);
+		// R-only mono: no stereo spread (one voice character, both outs).
+		float spreadUse = monoFromRight ? 0.f : spread;
+		core.process(in, out, freqNorm, res, clamp(noise01, 0.f, 1.f), drive, spreadUse, mode);
 
-		outputs[OUT_L_OUTPUT].setVoltage(out[0]);
-		outputs[OUT_R_OUTPUT].setVoltage(out[1]);
+		if (monoFromRight) {
+			outputs[OUT_L_OUTPUT].setVoltage(out[0]);
+			outputs[OUT_R_OUTPUT].setVoltage(out[0]);
+		} else {
+			outputs[OUT_L_OUTPUT].setVoltage(out[0]);
+			outputs[OUT_R_OUTPUT].setVoltage(out[1]);
+		}
+
+		// Clip light on OUTPUT: 10 V p-p ⇒ |out| > 5 V (either channel).
+		const float peakOut = std::max(std::fabs(out[0]), std::fabs(out[1]));
+		if (peakOut > clipLightThresh) {
+			clipLightEnv = 1.f;
+		} else if (clipLightEnv > 0.f) {
+			clipLightEnv -= args.sampleTime / clipLightSlewSec;
+			if (clipLightEnv < 0.f)
+				clipLightEnv = 0.f;
+		}
+		lights[CLIP_LIGHT].setBrightness(clipLightEnv);
 	}
 };
 
@@ -172,7 +218,7 @@ struct SuperLoveWidget : ModuleWidget {
 		addParam(createParamCentered<fmd::FmdTrimmer>(Vec(23.94f, 238.69f), module, SuperLove::RES_CV_PARAM));
 		addParam(createParamCentered<fmd::FmdTrimmer>(Vec(155.06f, 238.69f), module, SuperLove::SPREAD_CV_PARAM));
 
-		// -- LP6 / LP12 / BP / HP selector ----------------------------------
+		// -- LP18 / LP24 / BP / HP selector ---------------------------------
 		addParam(createParamCentered<fmd::FmdModeSlider>(Vec(89.50f, 248.39f), module, SuperLove::MODE_PARAM));
 
 		// -- CV inputs ------------------------------------------------------
@@ -182,10 +228,11 @@ struct SuperLoveWidget : ModuleWidget {
 		addInput(createInputCentered<fmd::FmdPort>(Vec(122.75f, 288.50f), module, SuperLove::DRIVE_INPUT));
 		addInput(createInputCentered<fmd::FmdPort>(Vec(156.12f, 288.50f), module, SuperLove::SPREAD_INPUT));
 
-		// -- IN / CLIP / OUT ------------------------------------------------
+		// -- IN / CLIP LED / OUT --------------------------------------------
 		addInput(createInputCentered<fmd::FmdPort>(Vec(22.88f, 332.94f), module, SuperLove::IN_L_INPUT));
 		addInput(createInputCentered<fmd::FmdPort>(Vec(56.12f, 332.94f), module, SuperLove::IN_R_INPUT));
-		addParam(createParamCentered<fmd::FmdClipTrimmer>(Vec(89.50f, 332.94f), module, SuperLove::CLIP_PARAM));
+		// CLIP knob removed — large red LED only (input |V| > 1, 0.1 s linear decay).
+		addChild(createLightCentered<LargeLight<RedLight>>(Vec(89.50f, 332.94f), module, SuperLove::CLIP_LIGHT));
 		addOutput(createOutputCentered<fmd::FmdPort>(Vec(122.75f, 332.94f), module, SuperLove::OUT_L_OUTPUT));
 		addOutput(createOutputCentered<fmd::FmdPort>(Vec(156.12f, 332.94f), module, SuperLove::OUT_R_OUTPUT));
 	}

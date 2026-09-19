@@ -69,7 +69,7 @@ struct FlowerChild : Module {
 		configParam(RES_PARAM, 0.f, 1.f, 0.2f, "Resonance", "%", 0.f, 100.f);
 		configParam(NOISE_PARAM, 0.f, 1.f, 0.f, "Noise", "%", 0.f, 100.f);
 		configParam(DRIVE_PARAM, 0.f, 1.f, 0.2f, "Drive", "%", 0.f, 100.f);
-		configParam(SPREAD_PARAM, 0.f, 1.f, 0.f, "Spread", "%", 0.f, 100.f);
+		configParam(SPREAD_PARAM, -1.f, 1.f, 0.f, "Spread", "%", 0.f, 100.f);
 		configParam(CLIP_PARAM, 0.f, 1.f, 0.25f, "Clip", "%", 0.f, 100.f);
 		configSwitch(AGGR_PARAM, 0.f, 1.f, 0.f, "Aggressive", {"Clean", "Dirty"});
 
@@ -114,6 +114,13 @@ struct FlowerChild : Module {
 		return clamp(v, 0.f, 1.f);
 	}
 
+	static float modulatedBipolar(float knob, Input& input, float attenuverter) {
+		float v = knob;
+		if (input.isConnected())
+			v += input.getVoltage() * 0.1f * attenuverter;
+		return clamp(v, -1.f, 1.f);
+	}
+
 	void process(const ProcessArgs& args) override {
 		core.setSampleRate(args.sampleRate);
 
@@ -121,7 +128,7 @@ struct FlowerChild : Module {
 		float res = modulated01(params[RES_PARAM].getValue(), inputs[RES_INPUT], params[RES_CV_PARAM].getValue());
 		float chaos = modulated01(params[NOISE_PARAM].getValue(), inputs[NOISE_INPUT], params[NOISE_CV_PARAM].getValue());
 		float drive = modulated01(params[DRIVE_PARAM].getValue(), inputs[DRIVE_INPUT], params[DRIVE_CV_PARAM].getValue());
-		float spread = modulated01(params[SPREAD_PARAM].getValue(), inputs[SPREAD_INPUT], params[SPREAD_CV_PARAM].getValue());
+		float spread = modulatedBipolar(params[SPREAD_PARAM].getValue(), inputs[SPREAD_INPUT], params[SPREAD_CV_PARAM].getValue());
 		float clip = params[CLIP_PARAM].getValue();
 		bool dirty = params[AGGR_PARAM].getValue() > 0.5f;
 

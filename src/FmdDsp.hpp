@@ -32,7 +32,7 @@ struct FilterParams {
 	float res = 0.f;
 	/** Input drive, 0..1. */
 	float drive = 0.f;
-	/** Stereo cutoff offset in octaves at full travel, 0..1. */
+	/** Stereo cutoff offset in octaves at full travel, bipolar -1..1 (0 = none). */
 	float spread = 0.f;
 	/** Dirt: injected noise on Flower Child / Super Love, resonance-path
 	    nonlinearity on Shaped Resonator. 0..1. */
@@ -159,8 +159,8 @@ struct FilterCore {
 		// knob is where self-oscillation lives.
 		float q = 0.5f * std::pow(50.f, clamp(p.res, 0.f, 1.f));
 
-		// SPREAD detunes the two channels by up to +/- one octave.
-		float spreadOct = clamp(p.spread, 0.f, 1.f);
+		// SPREAD detunes the two channels by up to +/- one octave (bipolar; 0 = none).
+		float spreadOct = clamp(p.spread, -1.f, 1.f);
 		float freq[2] = {
 			p.freqHz * std::pow(2.f, -spreadOct),
 			p.freqHz * std::pow(2.f, spreadOct),
@@ -226,6 +226,15 @@ inline float modulated(float knob, engine::Input& input, float attenuverter) {
 	if (input.isConnected())
 		v += input.getVoltage() * 0.1f * attenuverter;
 	return clamp(v, 0.f, 1.f);
+}
+
+
+/** Same as modulated(), but for bipolar -1..1 knobs (center = none). */
+inline float modulatedBipolar(float knob, engine::Input& input, float attenuverter) {
+	float v = knob;
+	if (input.isConnected())
+		v += input.getVoltage() * 0.1f * attenuverter;
+	return clamp(v, -1.f, 1.f);
 }
 
 

@@ -222,7 +222,7 @@ struct Core {
 	/** Process one stereo frame.
 	    freqNorm / res / chaos are 0..1 (original slider domain).
 	    drive scales the audio fed into the DSP (panel knob; not in the original).
-	    spread detunes the two channels' frequency norms (panel knob).
+	    spread is bipolar -1..1 and detunes the two channels' frequency norms (panel knob).
 	    clipAmount soft-limits the Rack-voltage output (panel knob).
 	    dirty selects Dirty/AGGR vs Clean.
 	    in/out are Rack audio voltages (nominally ±5 V). */
@@ -245,7 +245,7 @@ struct Core {
 		};
 
 		const float driveGain = 0.2f + clampf(drive, 0.f, 1.f) * 1.8f;
-		const float spreadAmt = clampf(spread, 0.f, 1.f) * 0.15f;
+		const float spreadAmt = clampf(spread, -1.f, 1.f) * 0.15f;
 
 		for (int c = 0; c < 2; c++) {
 			float freqC = freqNorm + (c == 0 ? -spreadAmt : spreadAmt);
