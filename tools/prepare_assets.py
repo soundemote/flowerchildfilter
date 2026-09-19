@@ -178,6 +178,8 @@ LABEL_INVENTORY = {
         "RES", "CRNCH", "DRV", "SPRD", "FREQ", "IN", "CLIP", "OUT"],
     "labels/SuperLove.svg": [
         "NOISE", "DRIVE", "FREQ", "RES", "SPREAD",
+        # Printed sheet is post-edited to LP18/LP24/HP/BP by
+        # tools/_relabel_superlove_modes.py (do not re-extract over that).
         "LP6", "LP12", "BP", "HP",
         "NOISE-CV", "FREQ-CV", "DRIVE-CV",
         "IN", "CLIP", "OUT"],

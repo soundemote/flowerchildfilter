@@ -3,7 +3,7 @@
 #include "FmdDsp.hpp"
 #include "FmdWidgets.hpp"
 
-/*  Super Love -- 12 HP stereo LP18 / LP24 / BP / HP filter (Superlove Rev2 DSP).
+/*  Super Love -- 12 HP stereo LP18 / LP24 / HP / BP filter (Superlove Rev2 DSP).
 
     Chaos is fixed at 0 (no Chaos control). Panel NOISE → Rev2 noise inject
     (0…1 knob maps to 0…2 amplitude).
@@ -69,8 +69,8 @@ struct SuperLove : Module {
 		// CLIP_PARAM slot retained so later param IDs stay stable; no widget / no soft-clip.
 		configParam(CLIP_PARAM, 0.f, 1.f, 0.f, "Clip");
 
-		// Printed on the panel above the slider, left to right (DSP: LP18/LP24/BP6/HP6).
-		configSwitch(MODE_PARAM, 0.f, 3.f, 1.f, "Mode", {"LP18", "LP24", "BP", "HP"});
+		// Printed on the panel above the slider, left to right: LP18 / LP24 / HP / BP.
+		configSwitch(MODE_PARAM, 0.f, 3.f, 1.f, "Mode", {"LP18", "LP24", "HP", "BP"});
 
 		configParam(RES_CV_PARAM, -1.f, 1.f, 0.f, "Resonance CV", "%", 0.f, 100.f);
 		configParam(NOISE_CV_PARAM, -1.f, 1.f, 0.f, "Noise CV", "%", 0.f, 100.f);
@@ -218,7 +218,7 @@ struct SuperLoveWidget : ModuleWidget {
 		addParam(createParamCentered<fmd::FmdTrimmer>(Vec(23.94f, 238.69f), module, SuperLove::RES_CV_PARAM));
 		addParam(createParamCentered<fmd::FmdTrimmer>(Vec(155.06f, 238.69f), module, SuperLove::SPREAD_CV_PARAM));
 
-		// -- LP18 / LP24 / BP / HP selector ---------------------------------
+		// -- LP18 / LP24 / HP / BP selector ---------------------------------
 		addParam(createParamCentered<fmd::FmdModeSlider>(Vec(89.50f, 248.39f), module, SuperLove::MODE_PARAM));
 
 		// -- CV inputs ------------------------------------------------------

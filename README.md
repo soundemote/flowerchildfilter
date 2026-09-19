@@ -7,7 +7,7 @@ Three 12 HP modules built to the brief in `../notes.txt`, using the artwork in
 | --- | --- | --- |
 | **Flower Child** | `FMD-FC-panel` (+ `AGGR` variant) | FREQ, RES, NOISE, DRIVE, SPREAD, AGGR, CLIP, 5 attenuverted CV ins, stereo I/O |
 | **Shaped Resonator** | `FMD-SR-panel` | FREQ, 4 faders (RES, CRNCH, DRV, SPRD), 3 shape buttons, CLIP, 5 attenuverted CV ins, stereo I/O |
-| **Super Love** | `FMD-SL-panel` | FREQ, RES, NOISE, DRIVE, SPREAD, LP6/LP12/BP/HP slider, CLIP, 5 attenuverted CV ins, stereo I/O |
+| **Super Love** | `FMD-SL-panel` | FREQ, RES, NOISE, DRIVE, SPREAD, LP18/LP24/HP/BP slider, CLIP, 5 attenuverted CV ins, stereo I/O |
 
 The brief's main goal — "getting knobs turning" — is met: every knob, fader,
 button and slider is a live parameter driving audio, with tooltips, right-click

@@ -2,7 +2,7 @@
 
 // Super Love — DSP from soemdsp-sandbox Superlove Rev2.
 // Chaos is fixed at 0 (no Chaos control on the VCV panel).
-// Modes: LP18 / LP24 / HP6 / BP6.
+// Modes: LP18 / LP24 / HP6 / BP6. Panel left→right: LP18, LP24, HP, BP.
 
 #include "vendor/sandbox_native_maths/scalar_helpers.h"
 #include "vendor/sandbox_native_maths/exp_log.h"
@@ -21,13 +21,13 @@ enum Mode {
 	MODE_BP = 3,
 };
 
-// Panel slider left→right: LP18, LP24, BP, HP (artwork labels may still say LP6/LP12).
+// Panel slider left→right: LP18, LP24, HP, BP.
 inline Mode modeFromPanel(int panel) {
 	switch (panel) {
 		case 0: return MODE_LP18;
 		case 1: return MODE_LP24;
-		case 2: return MODE_BP;
-		case 3: return MODE_HP;
+		case 2: return MODE_HP;
+		case 3: return MODE_BP;
 		default: return MODE_LP24;
 	}
 }
