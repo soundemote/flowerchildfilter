@@ -54,8 +54,8 @@ struct SuperLove : Module {
 	fmd::super_love::Core core;
 	/** Clip indicator envelope 1→0, linear decay over clipLightSlewSec. */
 	float clipLightEnv = 0.f;
-	// Output clip light: 10 V peak-to-peak ⇒ |sample| > 5 V on a bipolar out.
-	static constexpr float clipLightThresh = 5.f;
+	// Clip light: half as sensitive as the previous ±5 V trip (now ±10 V).
+	static constexpr float clipLightThresh = 10.f;
 	static constexpr float clipLightSlewSec = 0.1f;
 
 	SuperLove() {
@@ -64,7 +64,7 @@ struct SuperLove : Module {
 		configParam(FREQ_PARAM, 0.f, 10.f, 6.f, "Frequency", " Hz", 2.f, 20.f);
 		configParam(RES_PARAM, 0.f, 1.f, 0.3f, "Resonance", "%", 0.f, 100.f);
 		configParam(NOISE_PARAM, 0.f, 1.f, 0.f, "Noise", "%", 0.f, 100.f);
-		configParam(DRIVE_PARAM, 0.5f, 2.f, 1.f, "Drive", "x");
+		configParam(DRIVE_PARAM, 0.5f, 4.f, 1.f, "Drive", "x");
 		configParam(SPREAD_PARAM, -1.f, 1.f, 0.f, "Spread", "%", 0.f, 100.f);
 		// CLIP_PARAM slot retained so later param IDs stay stable; no widget / no soft-clip.
 		configParam(CLIP_PARAM, 0.f, 1.f, 0.f, "Clip");
@@ -116,11 +116,11 @@ struct SuperLove : Module {
 		float res = fmd::modulated(params[RES_PARAM].getValue(), inputs[RES_INPUT], params[RES_CV_PARAM].getValue());
 		// Panel Noise 0…1 (HP/BP → ±0…0.2 into feedback; LP → ±0…2 into In). Chaos fixed at face 0.
 		float noise01 = fmd::modulated(params[NOISE_PARAM].getValue(), inputs[NOISE_INPUT], params[NOISE_CV_PARAM].getValue());
-		// Drive is 0.5…2.0 (not 0…1) — don't use fmd::modulated (that clamps to 0…1).
+		// Drive is 0.5…4.0 (not 0…1) — don't use fmd::modulated (that clamps to 0…1).
 		float drive = params[DRIVE_PARAM].getValue();
 		if (inputs[DRIVE_INPUT].isConnected())
 			drive += inputs[DRIVE_INPUT].getVoltage() * 0.1f * params[DRIVE_CV_PARAM].getValue();
-		drive = clamp(drive, 0.5f, 2.f);
+		drive = clamp(drive, 0.5f, 4.f);
 		float spread = fmd::modulatedBipolar(params[SPREAD_PARAM].getValue(), inputs[SPREAD_INPUT], params[SPREAD_CV_PARAM].getValue());
 		int panelMode = clamp((int) std::round(params[MODE_PARAM].getValue()), 0, 3);
 		auto mode = fmd::super_love::modeFromPanel(panelMode);
@@ -154,7 +154,7 @@ struct SuperLove : Module {
 			outputs[OUT_R_OUTPUT].setVoltage(out[1]);
 		}
 
-		// Clip light on OUTPUT: 10 V p-p ⇒ |out| > 5 V (either channel).
+		// Clip light on OUTPUT: |out| > 10 V (either channel).
 		const float peakOut = std::max(std::fabs(out[0]), std::fabs(out[1]));
 		if (peakOut > clipLightThresh) {
 			clipLightEnv = 1.f;

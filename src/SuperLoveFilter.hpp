@@ -71,7 +71,8 @@ static const double kHpBpOutHalf = 0.5; // halve HP/BP final out
 static const double kChaosUi = 0.0;
 static const double kChaosHpBp = 0.37 + (0.61 - 0.37) * kChaosUi; // 0.37
 static const double kShapeHpBp = 1.0 - kChaosHpBp;                 // 0.63
-// Extra I/O pad: all modes see input×0.25, out×4.
+// Extra I/O pad for HP/BP only. LP is a phase waveshaper — do not pad
+// the Softwave Phase excursion (that linearized LP into a generic ladder).
 static const double kIoInputPad = 0.25;
 static const double kIoOutputBoost = 1.0 / kIoInputPad; // 4.0
 // Panel Noise 0…1 → inject 0…0.25 (LP: with In; HP/BP: feedback path)
@@ -244,15 +245,18 @@ inline double processSample(
 	const double cutoffHz = clampd(
 		pitchToFreq(jmap01(freqNorm, -12.0, 135.0)), 0.0, 0.5 * safeRate
 	);
-	// Extra global input pad (output boosted by inverse at return).
-	const double inPad = input * kIoInputPad;
 
 	if (safeMode <= 1) {
-		// LP18 / LP24 — Softwave Tri; noise 0…2 mixed with input
+		// LP18 / LP24 breadboard:
+		//   audio + noise → Softwave Phase (freq 0, morph 0.75, wrap)
+		//   LP out → attenuverter (amp = resonance −0.1…−6/−3, offset 0.25725)
+		//     → Softwave Phase
+		//   Softwave Out → LP (resonance 0) → HP 5 Hz DC → out
+		// Ladder Q is unused. Resonance is feedback *amplitude* into Phase.
 		const double noiseIn = (n01 > 1.0e-12)
 			? nextNoiseBipolar(&s.rngState) * (n01 * kLpNoiseMax)
 			: 0.0;
-		const double driven = (inPad + noiseIn) * kLpInputScale;
+		const double driven = (input + noiseIn) * kLpInputScale;
 		const double modMin = (safeMode == 0) ? kLp18ModMin : kLp24ModMin;
 		const double modMax = (safeMode == 0) ? kLp18ModMax : kLp24ModMax;
 		const double mod = modMin + (modMax - modMin) * reso;
@@ -266,9 +270,10 @@ inline double processSample(
 		const double dcA = ladderCoefficient(5.0, safeRate);
 		const double dcOut = ladderTapStep(s.dcY, s.feedbackSignal, dcA, 2, 3);
 		const double lpBoost = (safeMode == 0) ? kLp18FinalBoost : kLp24FinalBoost;
-		return dcOut * kLpOutputScale * kMasterOutScale * lpBoost * kIoOutputBoost;
+		return dcOut * kLpOutputScale * kMasterOutScale * lpBoost;
 	}
 
+	const double inPad = input * kIoInputPad;
 	const double driven = inPad * kHpBpInputScale;
 	// Chaos face = 0.0 → remapped 0.37 → shape 0.63 (does NOT track Noise).
 	const double shape = kShapeHpBp;
@@ -318,11 +323,11 @@ struct Core {
 		voice[0].reset(0x85EBCA6Bu);
 		voice[1].reset(0x85EBCA6Bu + 2654435761u);
 	}
-	// noise01: panel 0…1. drive: 0.5…2.0 input multiply. Chaos fixed at face 0.0.
+	// noise01: panel 0…1. drive: 0.5…4.0 input multiply. Chaos fixed at face 0.0.
 	void process(const float in[2], float out[2], float freqNorm, float res, float noise01,
 	             float drive, float spread, Mode mode) {
 		auto clampf = [](float v, float lo, float hi) { return v < lo ? lo : (v > hi ? hi : v); };
-		const float driveGain = clampf(drive, 0.5f, 2.f);
+		const float driveGain = clampf(drive, 0.5f, 4.f);
 		const float spreadAmt = clampf(spread, -1.f, 1.f) * 0.15f;
 		for (int c = 0; c < 2; c++) {
 			float freqC = clampf(freqNorm + (c == 0 ? -spreadAmt : spreadAmt), 0.f, 1.f);
