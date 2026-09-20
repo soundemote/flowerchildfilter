@@ -12,6 +12,7 @@ DISTRIBUTABLES += res/common
 DISTRIBUTABLES += res/SuperLove
 DISTRIBUTABLES += res/panels/SuperLove.png
 DISTRIBUTABLES += res/labels/SuperLove.svg
+DISTRIBUTABLES += LICENSE-VCV.md
 DISTRIBUTABLES += $(wildcard LICENSE*)
 DISTRIBUTABLES += $(wildcard presets)
 
