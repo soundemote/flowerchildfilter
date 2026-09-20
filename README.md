@@ -2,8 +2,7 @@
 
 One plugin (`slug`: **FMD**), many modules. Super Love is the first that ships.
 Flower Child and Shaped Resonator stay in the tree uncompiled until they are
-ready. Rename this git remote to something like `soemdsp-vcvrack` when you
-like; the Rack slug stays `FMD`.
+ready. GitHub repo: `soundemote/soemdsp-vcvrack`. Rack slug stays `FMD`.
 
 ```
 src/plugin.cpp              # registers shipped models only

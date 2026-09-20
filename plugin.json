@@ -7,7 +7,7 @@
   "author": "Soundemote",
   "authorUrl": "https://www.soundemote.com",
   "pluginUrl": "https://www.soundemote.com",
-  "sourceUrl": "https://github.com/code-dev1025/fmd-vcv",
+  "sourceUrl": "https://github.com/soundemote/soemdsp-vcvrack",
   "description": "FMD / Soundemote VCV Rack collection. Super Love ships now; more modules follow.",
   "modules": [
     {
