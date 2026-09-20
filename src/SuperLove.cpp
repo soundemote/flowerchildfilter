@@ -47,7 +47,9 @@ struct SuperLove : Module {
 		OUTPUTS_LEN
 	};
 	enum LightId {
-		CLIP_LIGHT,
+		CLIP_LIGHT,       // R  deep LED red → dark crimson → deep navy → off
+		CLIP_LIGHT_GREEN, // G
+		CLIP_LIGHT_BLUE,  // B
 		LIGHTS_LEN
 	};
 
@@ -56,7 +58,7 @@ struct SuperLove : Module {
 	float clipLightEnv = 0.f;
 	// Clip light: half as sensitive as the previous ±5 V trip (now ±10 V).
 	static constexpr float clipLightThresh = 10.f;
-	static constexpr float clipLightSlewSec = 0.1f;
+	static constexpr float clipLightSlewSec = 0.3f;
 
 	SuperLove() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -155,6 +157,7 @@ struct SuperLove : Module {
 		}
 
 		// Clip light on OUTPUT: |out| > 10 V (either channel).
+		// Envelope 1→0 paints red → purple → blue → black.
 		const float peakOut = std::max(std::fabs(out[0]), std::fabs(out[1]));
 		if (peakOut > clipLightThresh) {
 			clipLightEnv = 1.f;
@@ -163,7 +166,32 @@ struct SuperLove : Module {
 			if (clipLightEnv < 0.f)
 				clipLightEnv = 0.f;
 		}
-		lights[CLIP_LIGHT].setBrightness(clipLightEnv);
+		// Envelope 1→0: 100% E10035, 35% 33001F, 10% 000227, 0% 000000.
+		const float e = clipLightEnv;
+		const float stops[][4] = {
+			{1.00f, 0xE1 / 255.f, 0x00 / 255.f, 0x35 / 255.f},
+			{0.35f, 0x33 / 255.f, 0x00 / 255.f, 0x1F / 255.f},
+			{0.10f, 0x00 / 255.f, 0x02 / 255.f, 0x27 / 255.f},
+			{0.00f, 0.f,          0.f,          0.f},
+		};
+		float r = 0.f, g = 0.f, b = 0.f;
+		if (e >= stops[0][0]) {
+			r = stops[0][1]; g = stops[0][2]; b = stops[0][3];
+		} else {
+			for (int i = 0; i < 3; i++) {
+				if (e >= stops[i + 1][0]) {
+					const float span = stops[i][0] - stops[i + 1][0];
+					const float t = (span > 0.f) ? (e - stops[i + 1][0]) / span : 0.f;
+					r = stops[i + 1][1] + t * (stops[i][1] - stops[i + 1][1]);
+					g = stops[i + 1][2] + t * (stops[i][2] - stops[i + 1][2]);
+					b = stops[i + 1][3] + t * (stops[i][3] - stops[i + 1][3]);
+					break;
+				}
+			}
+		}
+		lights[CLIP_LIGHT].setBrightness(r);
+		lights[CLIP_LIGHT_GREEN].setBrightness(g);
+		lights[CLIP_LIGHT_BLUE].setBrightness(b);
 	}
 };
 
@@ -192,6 +220,15 @@ struct SlSmallKnob : fmd::LayeredKnob {
 		addLayer("res/SuperLove/KnobSmall-1-base.svg", false);
 		addLayer("res/SuperLove/KnobSmall-2-turn.svg", true);
 		addLayer("res/SuperLove/KnobSmall-3-overlay.svg", false);
+	}
+};
+
+
+struct ClipLed : GrayModuleLightWidget {
+	ClipLed() {
+		addBaseColor(nvgRGB(0xff, 0x00, 0x00));
+		addBaseColor(nvgRGB(0x00, 0xff, 0x00));
+		addBaseColor(nvgRGB(0x00, 0x00, 0xff));
 	}
 };
 
@@ -231,8 +268,7 @@ struct SuperLoveWidget : ModuleWidget {
 		// -- IN / CLIP LED / OUT --------------------------------------------
 		addInput(createInputCentered<fmd::FmdPort>(Vec(22.88f, 332.94f), module, SuperLove::IN_L_INPUT));
 		addInput(createInputCentered<fmd::FmdPort>(Vec(56.12f, 332.94f), module, SuperLove::IN_R_INPUT));
-		// CLIP knob removed — large red LED only (input |V| > 1, 0.1 s linear decay).
-		addChild(createLightCentered<LargeLight<RedLight>>(Vec(89.50f, 332.94f), module, SuperLove::CLIP_LIGHT));
+		addChild(createLightCentered<LargeLight<ClipLed>>(Vec(89.50f, 332.94f), module, SuperLove::CLIP_LIGHT));
 		addOutput(createOutputCentered<fmd::FmdPort>(Vec(122.75f, 332.94f), module, SuperLove::OUT_L_OUTPUT));
 		addOutput(createOutputCentered<fmd::FmdPort>(Vec(156.12f, 332.94f), module, SuperLove::OUT_R_OUTPUT));
 	}
