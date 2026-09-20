@@ -13,6 +13,7 @@ tests/test_dsp.exe
 # Editors / OS
 .vscode/
 .idea/
+tests/test_superlove.exe
 *.swp
 *~
 .DS_Store

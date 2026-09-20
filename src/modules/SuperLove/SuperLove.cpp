@@ -1,6 +1,6 @@
 #include "plugin.hpp"
 #include "SuperLoveFilter.hpp"
-#include "FmdDsp.hpp"
+#include "FmdCv.hpp"
 #include "FmdWidgets.hpp"
 
 /*  Super Love -- 12 HP stereo LP18 / LP24 / HP / BP filter (Superlove Rev2 DSP).
@@ -47,7 +47,7 @@ struct SuperLove : Module {
 		OUTPUTS_LEN
 	};
 	enum LightId {
-		CLIP_LIGHT,       // R  deep LED red → dark crimson → deep navy → off
+		CLIP_LIGHT,       // R  E10035 → 33001F → 000227 → off
 		CLIP_LIGHT_GREEN, // G
 		CLIP_LIGHT_BLUE,  // B
 		LIGHTS_LEN
@@ -108,8 +108,33 @@ struct SuperLove : Module {
 		clipLightEnv = 0.f;
 	}
 
+	static void clipLedRgb(float e, float* r, float* g, float* b) {
+		const float stops[][4] = {
+			{1.00f, 0xE1 / 255.f, 0x00 / 255.f, 0x35 / 255.f},
+			{0.35f, 0x33 / 255.f, 0x00 / 255.f, 0x1F / 255.f},
+			{0.10f, 0x00 / 255.f, 0x02 / 255.f, 0x27 / 255.f},
+			{0.00f, 0.f,          0.f,          0.f},
+		};
+		*r = *g = *b = 0.f;
+		if (e >= stops[0][0]) {
+			*r = stops[0][1]; *g = stops[0][2]; *b = stops[0][3];
+			return;
+		}
+		for (int i = 0; i < 3; i++) {
+			if (e >= stops[i + 1][0]) {
+				const float span = stops[i][0] - stops[i + 1][0];
+				const float t = (span > 0.f) ? (e - stops[i + 1][0]) / span : 0.f;
+				*r = stops[i + 1][1] + t * (stops[i][1] - stops[i + 1][1]);
+				*g = stops[i + 1][2] + t * (stops[i][2] - stops[i + 1][2]);
+				*b = stops[i + 1][3] + t * (stops[i][3] - stops[i + 1][3]);
+				return;
+			}
+		}
+	}
+
 	void process(const ProcessArgs& args) override {
-		core.setSampleRate(args.sampleRate);
+		if (core.sampleRate != args.sampleRate)
+			core.setSampleRate(args.sampleRate);
 
 		float freqNorm = clamp(params[FREQ_PARAM].getValue() / 10.f, 0.f, 1.f);
 		if (inputs[FREQ_INPUT].isConnected())
@@ -156,8 +181,6 @@ struct SuperLove : Module {
 			outputs[OUT_R_OUTPUT].setVoltage(out[1]);
 		}
 
-		// Clip light on OUTPUT: |out| > 10 V (either channel).
-		// Envelope 1→0 paints red → purple → blue → black.
 		const float peakOut = std::max(std::fabs(out[0]), std::fabs(out[1]));
 		if (peakOut > clipLightThresh) {
 			clipLightEnv = 1.f;
@@ -166,29 +189,8 @@ struct SuperLove : Module {
 			if (clipLightEnv < 0.f)
 				clipLightEnv = 0.f;
 		}
-		// Envelope 1→0: 100% E10035, 35% 33001F, 10% 000227, 0% 000000.
-		const float e = clipLightEnv;
-		const float stops[][4] = {
-			{1.00f, 0xE1 / 255.f, 0x00 / 255.f, 0x35 / 255.f},
-			{0.35f, 0x33 / 255.f, 0x00 / 255.f, 0x1F / 255.f},
-			{0.10f, 0x00 / 255.f, 0x02 / 255.f, 0x27 / 255.f},
-			{0.00f, 0.f,          0.f,          0.f},
-		};
 		float r = 0.f, g = 0.f, b = 0.f;
-		if (e >= stops[0][0]) {
-			r = stops[0][1]; g = stops[0][2]; b = stops[0][3];
-		} else {
-			for (int i = 0; i < 3; i++) {
-				if (e >= stops[i + 1][0]) {
-					const float span = stops[i][0] - stops[i + 1][0];
-					const float t = (span > 0.f) ? (e - stops[i + 1][0]) / span : 0.f;
-					r = stops[i + 1][1] + t * (stops[i][1] - stops[i + 1][1]);
-					g = stops[i + 1][2] + t * (stops[i][2] - stops[i + 1][2]);
-					b = stops[i + 1][3] + t * (stops[i][3] - stops[i + 1][3]);
-					break;
-				}
-			}
-		}
+		clipLedRgb(clipLightEnv, &r, &g, &b);
 		lights[CLIP_LIGHT].setBrightness(r);
 		lights[CLIP_LIGHT_GREEN].setBrightness(g);
 		lights[CLIP_LIGHT_BLUE].setBrightness(b);

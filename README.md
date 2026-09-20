@@ -1,13 +1,24 @@
-# FMD — VCV Rack plugin
+# FMD — VCV Rack collection
 
-Three 12 HP modules built to the brief in `../notes.txt`, using the artwork in
-`../image assets/`:
+One plugin (`slug`: **FMD**), many modules. Super Love is the first that ships.
+Flower Child and Shaped Resonator stay in the tree uncompiled until they are
+ready. Rename this git remote to something like `soemdsp-vcvrack` when you
+like; the Rack slug stays `FMD`.
 
-| Module | Panel | Controls |
+```
+src/plugin.cpp              # registers shipped models only
+src/common/                 # widgets, CV helpers, sandbox maths
+src/modules/SuperLove/      # compiled
+src/modules/FlowerChild/    # wip
+src/modules/ShapedResonator/# wip
+res/                        # per-module artwork; dist packs Super Love only
+```
+
+| Module | Status | Panel |
 | --- | --- | --- |
-| **Flower Child** | `FMD-FC-panel` (+ `AGGR` variant) | FREQ, RES, NOISE, DRIVE, SPREAD, AGGR, CLIP, 5 attenuverted CV ins, stereo I/O |
-| **Shaped Resonator** | `FMD-SR-panel` | FREQ, 4 faders (RES, CRNCH, DRV, SPRD), 3 shape buttons, CLIP, 5 attenuverted CV ins, stereo I/O |
-| **Super Love** | `FMD-SL-panel` | FREQ, RES, NOISE, DRIVE, SPREAD, LP18/LP24/HP/BP slider, CLIP, 5 attenuverted CV ins, stereo I/O |
+| **Super Love** | ships | `res/panels/SuperLove.png` |
+| **Flower Child** | wip | `res/panels/FlowerChild.png` (+ AGGR) |
+| **Shaped Resonator** | wip | `res/panels/ShapedResonator.png` |
 
 The brief's main goal — "getting knobs turning" — is met: every knob, fader,
 button and slider is a live parameter driving audio, with tooltips, right-click

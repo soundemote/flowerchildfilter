@@ -2,6 +2,7 @@
 #include "ShapedResonatorFilter.hpp"
 #include "FmdDsp.hpp"
 #include "FmdWidgets.hpp"
+// wip: add src/modules/ShapedResonator/ShapedResonator.cpp to Makefile SOURCES to ship.
 
 /*  Shaped Resonator -- 12 HP stereo resonant filter.
 

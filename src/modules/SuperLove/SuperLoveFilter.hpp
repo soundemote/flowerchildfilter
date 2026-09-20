@@ -109,12 +109,17 @@ static double dsp_ln(double x) {
 	return (double)e * 0.6931471805599453 + 2.0 * series;
 }
 
-struct GraphNode { double x, y, skew; int shape; };
-static double evalGraphNodes(const GraphNode* nodes, int count, double x) {
-	Graph g;
-	for (int i = 0; i < count; i++)
-		g.addNode(nodes[i].x, nodes[i].y, nodes[i].skew, (Graph::Shape)nodes[i].shape);
-	return g.getValue(x);
+// HP/BP resonance curve is two fixed breakpoints. Build once — getValue is
+// identical to reconstructing the Graph every sample.
+static double hpBpResonanceMod(double reso) {
+	static Graph g;
+	static bool ready = false;
+	if (!ready) {
+		g.addNode(0.0, -0.2, 0.0, Graph::Shape::LINEAR);
+		g.addNode(1.0, 1.3, -0.85, Graph::Shape::EXPONENTIAL);
+		ready = true;
+	}
+	return g.getValue(reso);
 }
 
 static double soft_tanh(double v) {
@@ -284,8 +289,7 @@ inline double processSample(
 
 	if (safeMode == 2) {
 		// HP6
-		const GraphNode resonanceGraph[2] = { {0, -0.2, 0, 0}, {1, 1.3, -0.85, 2} };
-		const double mod = evalGraphNodes(resonanceGraph, 2, reso);
+		const double mod = hpBpResonanceMod(reso);
 
 		s.feedbackSignal = mod * s.feedbackSignal + driven + noiseFb;
 		double oscValue = -waveTrisaw(s.feedbackSignal + 0.75, shape);
@@ -301,8 +305,7 @@ inline double processSample(
 	}
 
 	// BP6
-	const GraphNode resonanceGraph[2] = { {0, -0.2, 0, 0}, {1, 1.3, -0.85, 2} };
-	const double mod = evalGraphNodes(resonanceGraph, 2, reso);
+	const double mod = hpBpResonanceMod(reso);
 
 	s.feedbackSignal = mod * s.feedbackSignal + driven + noiseFb;
 	double oscValue = -waveTrisaw(s.feedbackSignal + 0.75, shape);

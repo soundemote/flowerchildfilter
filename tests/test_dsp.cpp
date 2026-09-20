@@ -11,7 +11,7 @@
     FlowerChildFilterCore, these should keep passing. */
 
 #define FMD_DSP_TEST_SHIM
-#include "../src/FmdDsp.hpp"
+#include "../src/common/FmdDsp.hpp"
 
 #include <cmath>
 #include <cstdio>

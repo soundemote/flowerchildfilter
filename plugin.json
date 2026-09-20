@@ -8,26 +8,8 @@
   "authorUrl": "https://www.soundemote.com",
   "pluginUrl": "https://www.soundemote.com",
   "sourceUrl": "https://github.com/code-dev1025/fmd-vcv",
-  "description": "Filters and resonators from FMD / Soundemote.",
+  "description": "FMD / Soundemote VCV Rack collection. Super Love ships now; more modules follow.",
   "modules": [
-    {
-      "slug": "FlowerChild",
-      "name": "Flower Child",
-      "description": "Stereo resonant self-oscillating filter (Clean / Dirty) with noise, drive, spread and clip.",
-      "tags": [
-        "Filter",
-        "Effect"
-      ]
-    },
-    {
-      "slug": "ShapedResonator",
-      "name": "Shaped Resonator",
-      "description": "Stereo resonant filter with three response shapes, crunch and spread.",
-      "tags": [
-        "Filter",
-        "Effect"
-      ]
-    },
     {
       "slug": "SuperLove",
       "name": "Super Love",

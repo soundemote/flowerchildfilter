@@ -1,6 +1,6 @@
 /* Smoke test for the real Flower Child Clean/Dirty DSP (no Rack). */
 
-#include "../src/FlowerChildFilter.hpp"
+#include "../src/modules/FlowerChild/FlowerChildFilter.hpp"
 
 #include <cmath>
 #include <cstdio>

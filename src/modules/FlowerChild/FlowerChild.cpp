@@ -1,6 +1,7 @@
 #include "plugin.hpp"
 #include "FlowerChildFilter.hpp"
 #include "FmdWidgets.hpp"
+// wip: add src/modules/FlowerChild/FlowerChild.cpp to Makefile SOURCES to ship.
 
 /*  Flower Child -- 12 HP stereo multimode filter.
 

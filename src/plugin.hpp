@@ -5,6 +5,5 @@ using namespace rack;
 
 extern Plugin* pluginInstance;
 
-extern Model* modelFlowerChild;
-extern Model* modelShapedResonator;
 extern Model* modelSuperLove;
+// wip (src/modules/, not compiled): modelFlowerChild, modelShapedResonator
