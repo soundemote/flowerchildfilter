@@ -326,11 +326,11 @@ struct Core {
 		voice[0].reset(0x85EBCA6Bu);
 		voice[1].reset(0x85EBCA6Bu + 2654435761u);
 	}
-	// noise01: panel 0…1. drive: 0.5…4.0 input multiply. Chaos fixed at face 0.0.
+	// noise01: panel 0…1. drive: 0…4 input multiply. Chaos fixed at face 0.0.
 	void process(const float in[2], float out[2], float freqNorm, float res, float noise01,
 	             float drive, float spread, Mode mode) {
 		auto clampf = [](float v, float lo, float hi) { return v < lo ? lo : (v > hi ? hi : v); };
-		const float driveGain = clampf(drive, 0.5f, 4.f);
+		const float driveGain = clampf(drive, 0.f, 4.f);
 		const float spreadAmt = clampf(spread, -1.f, 1.f) * 0.15f;
 		for (int c = 0; c < 2; c++) {
 			float freqC = clampf(freqNorm + (c == 0 ? -spreadAmt : spreadAmt), 0.f, 1.f);

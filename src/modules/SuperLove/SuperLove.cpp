@@ -3,6 +3,29 @@
 #include "FmdCv.hpp"
 #include "FmdWidgets.hpp"
 
+#include <cmath>
+
+namespace {
+// Knob 0…1 → gain 0…4×. CCW = 0, noon = 1×, CW = 4×. Default 0.5×.
+float driveGainFromKnob(float t) {
+	t = clamp(t, 0.f, 1.f);
+	return 4.f * t * t;
+}
+float driveKnobFromGain(float g) {
+	g = clamp(g, 0.f, 4.f);
+	return std::sqrt(g * 0.25f);
+}
+}
+
+struct SuperLoveDriveQuantity : ParamQuantity {
+	float getDisplayValue() override {
+		return driveGainFromKnob(getValue());
+	}
+	void setDisplayValue(float v) override {
+		setValue(driveKnobFromGain(v));
+	}
+};
+
 /*  Super Love -- 12 HP stereo LP18 / LP24 / HP / BP filter (Superlove Rev2 DSP).
 
     Chaos is fixed at 0 (no Chaos control). Panel NOISE → Rev2 noise inject
@@ -66,7 +89,7 @@ struct SuperLove : Module {
 		configParam(FREQ_PARAM, 0.f, 10.f, 6.f, "Frequency", " Hz", 2.f, 20.f);
 		configParam(RES_PARAM, 0.f, 1.f, 0.3f, "Resonance", "%", 0.f, 100.f);
 		configParam(NOISE_PARAM, 0.f, 1.f, 0.f, "Noise", "%", 0.f, 100.f);
-		configParam(DRIVE_PARAM, 0.5f, 4.f, 1.f, "Drive", "x");
+		configParam<SuperLoveDriveQuantity>(DRIVE_PARAM, 0.f, 1.f, std::sqrt(0.125f), "Drive", "x");
 		configParam(SPREAD_PARAM, -1.f, 1.f, 0.f, "Spread", "%", 0.f, 100.f);
 		// CLIP_PARAM slot retained so later param IDs stay stable; no widget / no soft-clip.
 		configParam(CLIP_PARAM, 0.f, 1.f, 0.f, "Clip");
@@ -108,6 +131,27 @@ struct SuperLove : Module {
 		clipLightEnv = 0.f;
 	}
 
+	json_t* dataToJson() override {
+		json_t* rootJ = json_object();
+		json_object_set_new(rootJ, "driveMap", json_integer(3));
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		json_t* mapJ = json_object_get(rootJ, "driveMap");
+		int map = mapJ ? (int) json_integer_value(mapJ) : 0;
+		if (map >= 3)
+			return;
+		float g;
+		if (map == 2) {
+			float t = clamp(params[DRIVE_PARAM].getValue(), 0.f, 1.f);
+			g = 0.25f * std::exp2(4.f * t);
+		} else {
+			g = params[DRIVE_PARAM].getValue();
+		}
+		params[DRIVE_PARAM].setValue(driveKnobFromGain(g));
+	}
+
 	static void clipLedRgb(float e, float* r, float* g, float* b) {
 		const float stops[][4] = {
 			{1.00f, 0xE1 / 255.f, 0x00 / 255.f, 0x35 / 255.f},
@@ -143,11 +187,8 @@ struct SuperLove : Module {
 		float res = fmd::modulated(params[RES_PARAM].getValue(), inputs[RES_INPUT], params[RES_CV_PARAM].getValue());
 		// Panel Noise 0…1 (HP/BP → ±0…0.2 into feedback; LP → ±0…2 into In). Chaos fixed at face 0.
 		float noise01 = fmd::modulated(params[NOISE_PARAM].getValue(), inputs[NOISE_INPUT], params[NOISE_CV_PARAM].getValue());
-		// Drive is 0.5…4.0 (not 0…1) — don't use fmd::modulated (that clamps to 0…1).
-		float drive = params[DRIVE_PARAM].getValue();
-		if (inputs[DRIVE_INPUT].isConnected())
-			drive += inputs[DRIVE_INPUT].getVoltage() * 0.1f * params[DRIVE_CV_PARAM].getValue();
-		drive = clamp(drive, 0.5f, 4.f);
+		float drive = driveGainFromKnob(fmd::modulated(
+			params[DRIVE_PARAM].getValue(), inputs[DRIVE_INPUT], params[DRIVE_CV_PARAM].getValue()));
 		float spread = fmd::modulatedBipolar(params[SPREAD_PARAM].getValue(), inputs[SPREAD_INPUT], params[SPREAD_CV_PARAM].getValue());
 		int panelMode = clamp((int) std::round(params[MODE_PARAM].getValue()), 0, 3);
 		auto mode = fmd::super_love::modeFromPanel(panelMode);

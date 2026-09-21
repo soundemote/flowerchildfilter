@@ -308,6 +308,85 @@ FmdModeSlider::FmdModeSlider() {
 }
 
 
+void FmdModeSlider::onDragStart(const DragStartEvent& e) {
+	if (e.button != GLFW_MOUSE_BUTTON_LEFT)
+		return;
+	engine::ParamQuantity* pq = getParamQuantity();
+	dragOldValue = pq ? pq->getValue() : NAN;
+	dragSlid = false;
+	dragDist = 0.f;
+	ParamWidget::onDragStart(e);
+}
+
+
+void FmdModeSlider::onDragMove(const DragMoveEvent& e) {
+	if (e.button != GLFW_MOUSE_BUTTON_LEFT)
+		return;
+
+	dragDist += e.mouseDelta.norm();
+	const float clickPx = 8.f;
+	if (dragDist >= clickPx) {
+		dragSlid = true;
+		engine::ParamQuantity* pq = getParamQuantity();
+		if (pq && handle) {
+			math::Vec local = APP->scene->mousePos.minus(getAbsoluteOffset(math::Vec()));
+			float minX = minHandlePos.x + handle->box.size.x * 0.5f;
+			float maxX = maxHandlePos.x + handle->box.size.x * 0.5f;
+			float t = (maxX > minX) ? (local.x - minX) / (maxX - minX) : 0.f;
+			t = math::clamp(t, 0.f, 1.f);
+			pq->setValue(math::rescale(t, 0.f, 1.f, pq->getMinValue(), pq->getMaxValue()));
+		}
+	}
+	ParamWidget::onDragMove(e);
+}
+
+
+void FmdModeSlider::onDragEnd(const DragEndEvent& e) {
+	if (e.button != GLFW_MOUSE_BUTTON_LEFT)
+		return;
+
+	engine::ParamQuantity* pq = getParamQuantity();
+	if (pq && !dragSlid) {
+		int mods = APP->window->getMods();
+		if ((mods & RACK_MOD_MASK) == RACK_MOD_CTRL) {
+			if (pq->isMin())
+				pq->setMax();
+			else
+				pq->setValue(std::round(pq->getValue()) - 1.f);
+		}
+		else if ((mods & RACK_MOD_MASK) == 0) {
+			if (pq->isMax())
+				pq->setMin();
+			else
+				pq->setValue(std::round(pq->getValue()) + 1.f);
+		}
+	}
+
+	if (pq && module && !std::isnan(dragOldValue) && dragOldValue != pq->getValue()) {
+		history::ParamChange* h = new history::ParamChange;
+		h->name = "move " + pq->getLabel();
+		h->moduleId = module->id;
+		h->paramId = paramId;
+		h->oldValue = dragOldValue;
+		h->newValue = pq->getValue();
+		APP->history->push(h);
+	}
+	dragOldValue = NAN;
+	dragSlid = false;
+	ParamWidget::onDragEnd(e);
+}
+
+
+void FmdModeSlider::onDoubleClick(const DoubleClickEvent& e) {
+	widget::OpaqueWidget::onDoubleClick(e);
+}
+
+
+void FmdModeSlider::onHoverScroll(const HoverScrollEvent& e) {
+	ParamWidget::onHoverScroll(e);
+}
+
+
 // ---------------------------------------------------------------------------
 // Ports
 // ---------------------------------------------------------------------------

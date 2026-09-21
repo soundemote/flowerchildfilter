@@ -14,6 +14,7 @@ tests/test_dsp.exe
 .vscode/
 .idea/
 tests/test_superlove.exe
+tests/test_flower_child.exe
 *.swp
 *~
 .DS_Store

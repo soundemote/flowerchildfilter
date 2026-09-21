@@ -152,9 +152,19 @@ struct FmdFader : app::SvgSlider {
 	FmdFader();
 };
 
-/** Horizontal 4-position filter mode selector on Super Love. */
+/** Horizontal 4-position filter mode selector on Super Love.
+Click +1 (wraps), Ctrl-click −1. Drag maps mouse X onto the four ticks. */
 struct FmdModeSlider : app::SvgSlider {
+	float dragOldValue = NAN;
+	bool dragSlid = false;
+	float dragDist = 0.f;
+
 	FmdModeSlider();
+	void onDragStart(const DragStartEvent& e) override;
+	void onDragMove(const DragMoveEvent& e) override;
+	void onDragEnd(const DragEndEvent& e) override;
+	void onDoubleClick(const DoubleClickEvent& e) override;
+	void onHoverScroll(const HoverScrollEvent& e) override;
 };
 
 
