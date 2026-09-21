@@ -1,6 +1,4 @@
-# FMD
-
-Soundemote VCV Rack collection. Superlove ships now.
+Soundemote VCV Rack collection. 1 module so far: Superlove Filter
 
 ## Superlove Filter
 
