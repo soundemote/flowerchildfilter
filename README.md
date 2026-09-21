@@ -8,19 +8,12 @@ Soundemote VCV Rack collection. Superlove ships now.
 
 Superlove Filter uses a hand crafted "Phase-feedback wavetable" algorithm that recreates the style of a boutique MS20 clone with Doepfer Xtreme amounts of distortion. Using the lowpass filter on a sawtooth makes for good basses. Filter with medium drive and resonance for growling lows and smooth chirpy highs. Lower the resonance and turn up the drive for warmth and saturation. The bandpass and highpass filters are a different beast going quickly into screaming self oscillation, but if dialed carefully these modes allow for musical leads with an organic quality. This filter will feel at home in 80s and 90s inspired music. Superlove algorithm is different from most filters. At the heart of the LP18/LP24 algorithm sits a soft-edged triangle waveshaper. The soft edge prevents aliasing and is also responsible for Superlove's slightly gritty texture.
 
-```mermaid
-flowchart LR
-  IN --> Drive --> Mix
-  NOISE --> Mix
-  Mix --> wavetable --> filter --> OUT
-  filter -->|RES| Mix
-  FREQ --> filter
-```
+![Superlove signal flow](docs/superlove-signal.svg)
 
 | | |
 | --- | --- |
 | **FREQ** | Cutoff. 1V/oct on the FREQ jack. |
-| **RES** | Feedback into wavetable phase. Self-oscillates in all modes. Screams in HP / BP. |
+| **RES** | Feedback into triangle wavetable phase. Self-oscillates in all modes. Screams in HP / BP. |
 | **DRIVE** | Input gain (0×–4×). Noon is 1×. Default 0.5×. |
 | **NOISE** | Noise into the filter. |
 | **SPREAD** | Stereo frequency offset. |
