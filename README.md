@@ -19,6 +19,10 @@ Superlove Filter uses a hand crafted "Phase-feedback wavetable" algorithm that r
 
 Stereo in/out. CLIP is a peak LED.
 
+## Audio Demos
+
+* https://youtu.be/36fkv5bXsv0 Bandpass filter max resonance
+
 ## Building
 
 You need the [Rack SDK](https://vcvrack.com/downloads/) and a MinGW-w64 toolchain (Windows), or the standard toolchain for your OS.
