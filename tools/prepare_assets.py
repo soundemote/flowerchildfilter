@@ -99,7 +99,7 @@ PANELS = [
     ("Flower Child/Panel/FMD-FC-panel-950.png",      "panels/FlowerChild.png"),
     ("Flower Child/Panel/FMD-FC-panel-AGGR-950.png", "panels/FlowerChildAggr.png"),
     ("Shaped Resonator/Panel/FMD-SR-panel-950.png",  "panels/ShapedResonator.png"),
-    ("Super Love/Panel/FMD-SL-panel-950.png",        "panels/SuperLove.png"),
+    ("Super Love/Panel/FMD-SL-panel-1520.png",       "panels/SuperLove.png"),
 ]
 
 # ---------------------------------------------------------------------------
@@ -244,7 +244,7 @@ def write_labels(src_path, dst_path, vw, vh, wrap, names, expected):
         # type has to stretch with it. Without preserveAspectRatio="none",
         # nanosvg fits the viewBox with a uniform scale and centres it, which
         # walks the labels off the controls by a fraction of a pixel.
-        '     width="%g" height="%g" viewBox="0 0 %g %g" preserveAspectRatio="none">'
+        '     width="%g" height="%g" viewBox="0 0 %g %g" preserveAspectRatio="none" fill="none">'
         % (PANEL_W, PANEL_H, vw, vh),
     ]
     pad = "  "

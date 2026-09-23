@@ -58,7 +58,6 @@ The sheet is the full 179 x 380 panel, so the widget sits at the module origin.
 Add it straight after setPanel() to put the type above the artwork and below the
 controls. */
 struct PanelLabels : widget::Widget {
-	widget::FramebufferWidget* fb;
 	widget::SvgWidget* sw;
 
 	/** `resPath` is relative to the plugin dir, e.g. "res/labels/SuperLove.svg". */

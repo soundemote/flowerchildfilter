@@ -94,8 +94,8 @@ struct SuperLove : Module {
 		// CLIP_PARAM slot retained so later param IDs stay stable; no widget / no soft-clip.
 		configParam(CLIP_PARAM, 0.f, 1.f, 0.f, "Clip");
 
-		// Printed on the panel above the slider, left to right: LP18 / LP24 / HP / BP.
-		configSwitch(MODE_PARAM, 0.f, 3.f, 1.f, "Mode", {"LP18", "LP24", "HP", "BP"});
+		// Printed on the panel above the slider, left to right: LP18 / LP24 / BP / HP.
+		configSwitch(MODE_PARAM, 0.f, 3.f, 1.f, "Mode", {"LP18", "LP24", "BP", "HP"});
 
 		configParam(RES_CV_PARAM, -1.f, 1.f, 0.f, "Resonance CV", "%", 0.f, 100.f);
 		configParam(NOISE_CV_PARAM, -1.f, 1.f, 0.f, "Noise CV", "%", 0.f, 100.f);

@@ -64,17 +64,11 @@ void PngPanel::draw(const DrawArgs& args) {
 PanelLabels::PanelLabels(const std::string& resPath) {
 	box.size = math::Vec(PANEL_W, PANEL_H);
 
-	// The type never changes, so it is rendered once into a framebuffer rather
-	// than re-tessellated every frame -- a label sheet is up to 36 glyph paths.
-	fb = new widget::FramebufferWidget;
-	addChild(fb);
-
+	// Draw the type SVG directly (no framebuffer). A framebuffer can composite
+	// as an opaque white sheet over the raster panel.
 	sw = new widget::SvgWidget;
 	sw->setSvg(loadRes(resPath));
-	fb->addChild(sw);
-	// SvgWidget::wrap() leaves this at zero if the sheet failed to load, which
-	// is the right outcome: no labels rather than a framebuffer of nothing.
-	fb->box.size = sw->box.size;
+	addChild(sw);
 }
 
 

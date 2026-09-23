@@ -15,7 +15,7 @@ Superlove Filter uses a hand crafted "Phase-feedback wavetable" algorithm that r
 | **DRIVE** | Input gain (0×–4×). Noon is 1×. Default 0.5×. |
 | **NOISE** | Noise into the filter. |
 | **SPREAD** | Stereo frequency offset. |
-| **MODES** | LP18, LP24, HP, BP. |
+| **MODES** | LP18, LP24, BP, HP. |
 
 IN 1 only is mono (same signal on both outs). IN 1 and IN 2 is stereo. SPREAD applies in stereo. CLIP: driven input (jack × Drive) over ±10 V is 0.25 (blue); output over ±10 V is 1.0 (red); both clamp at 1.0.
 
