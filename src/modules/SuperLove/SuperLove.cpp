@@ -120,6 +120,23 @@ struct SuperLove : Module {
 		configBypass(IN_R_INPUT, OUT_R_OUTPUT);
 	}
 
+	void processBypass(const ProcessArgs& args) override {
+		(void) args;
+		const bool stereo = inputs[IN_L_INPUT].isConnected() && inputs[IN_R_INPUT].isConnected();
+		float v = 0.f;
+		if (stereo) {
+			outputs[OUT_L_OUTPUT].setVoltage(inputs[IN_L_INPUT].getVoltage());
+			outputs[OUT_R_OUTPUT].setVoltage(inputs[IN_R_INPUT].getVoltage());
+			return;
+		}
+		if (inputs[IN_L_INPUT].isConnected())
+			v = inputs[IN_L_INPUT].getVoltage();
+		else if (inputs[IN_R_INPUT].isConnected())
+			v = inputs[IN_R_INPUT].getVoltage();
+		outputs[OUT_L_OUTPUT].setVoltage(v);
+		outputs[OUT_R_OUTPUT].setVoltage(v);
+	}
+
 	void onSampleRateChange(const SampleRateChangeEvent& e) override {
 		core.setSampleRate(e.sampleRate);
 		core.reset();
@@ -193,37 +210,26 @@ struct SuperLove : Module {
 		int panelMode = clamp((int) std::round(params[MODE_PARAM].getValue()), 0, 3);
 		auto mode = fmd::super_love::modeFromPanel(panelMode);
 
-		// Normal: L (+ optional R). L-only → mono (R in follows L).
-		// R-only → mono via left filter voice; duplicate that out to L and R.
-		const bool leftConn = inputs[IN_L_INPUT].isConnected();
-		const bool rightConn = inputs[IN_R_INPUT].isConnected();
+		// IN1 only → mono (one voice, both outs identical). IN1+IN2 → stereo.
+		const bool stereo = inputs[IN_L_INPUT].isConnected() && inputs[IN_R_INPUT].isConnected();
 		float in[2] = {0.f, 0.f};
-		bool monoFromRight = false;
-		if (leftConn && rightConn) {
+		if (stereo) {
 			in[0] = inputs[IN_L_INPUT].getVoltage();
 			in[1] = inputs[IN_R_INPUT].getVoltage();
-		} else if (leftConn) {
-			in[0] = in[1] = inputs[IN_L_INPUT].getVoltage();
-		} else if (rightConn) {
-			monoFromRight = true;
-			in[0] = in[1] = inputs[IN_R_INPUT].getVoltage();
+		} else if (inputs[IN_L_INPUT].isConnected()) {
+			in[0] = inputs[IN_L_INPUT].getVoltage();
+		} else if (inputs[IN_R_INPUT].isConnected()) {
+			in[0] = inputs[IN_R_INPUT].getVoltage();
 		}
 
 		float out[2] = {0.f, 0.f};
-		// R-only mono: no stereo spread (one voice character, both outs).
-		float spreadUse = monoFromRight ? 0.f : spread;
-		core.process(in, out, freqNorm, res, clamp(noise01, 0.f, 1.f), drive, spreadUse, mode);
+		core.process(in, out, freqNorm, res, clamp(noise01, 0.f, 1.f), drive, spread, mode, stereo);
+		outputs[OUT_L_OUTPUT].setVoltage(out[0]);
+		outputs[OUT_R_OUTPUT].setVoltage(out[1]);
 
-		if (monoFromRight) {
-			outputs[OUT_L_OUTPUT].setVoltage(out[0]);
-			outputs[OUT_R_OUTPUT].setVoltage(out[0]);
-		} else {
-			outputs[OUT_L_OUTPUT].setVoltage(out[0]);
-			outputs[OUT_R_OUTPUT].setVoltage(out[1]);
-		}
-
+		const float peakIn = std::max(std::fabs(in[0]), std::fabs(in[1])) * drive;
 		const float peakOut = std::max(std::fabs(out[0]), std::fabs(out[1]));
-		if (peakOut > clipLightThresh) {
+		if (std::max(peakIn, peakOut) > clipLightThresh) {
 			clipLightEnv = 1.f;
 		} else if (clipLightEnv > 0.f) {
 			clipLightEnv -= args.sampleTime / clipLightSlewSec;

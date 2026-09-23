@@ -53,6 +53,10 @@ using namespace soemdsp_maths;
 
 static const double kSoftwaveTriMorph = 0.75;
 static const double kPhaseBias = 0.25725;
+// LP24 breadboard: patches/filter breadboards/superlove lp24 breadboard.json
+// Softwave Osc morph 0.834, phase 0.85 cycle.
+static const double kLp24SoftwaveTriMorph = 0.834;
+static const double kLp24PhaseBias = 0.85;
 static const double kLp18ModMin = -0.1;
 static const double kLp18ModMax = -6.0;
 static const double kLp24ModMin = -0.1;
@@ -265,8 +269,10 @@ inline double processSample(
 		const double modMin = (safeMode == 0) ? kLp18ModMin : kLp24ModMin;
 		const double modMax = (safeMode == 0) ? kLp18ModMax : kLp24ModMax;
 		const double mod = modMin + (modMax - modMin) * reso;
-		const double phaseArg = driven + (mod * s.feedbackSignal + kPhaseBias);
-		const double oscValue = softwaveTri(phaseArg, kSoftwaveTriMorph, 0.0);
+		const double morph = (safeMode == 1) ? kLp24SoftwaveTriMorph : kSoftwaveTriMorph;
+		const double phaseBias = (safeMode == 1) ? kLp24PhaseBias : kPhaseBias;
+		const double phaseArg = driven + (mod * s.feedbackSignal + phaseBias);
+		const double oscValue = softwaveTri(phaseArg, morph, 0.0);
 
 		const double a = ladderCoefficient(cutoffHz, safeRate);
 		const int stages = safeMode == 0 ? 3 : 4;
@@ -328,11 +334,12 @@ struct Core {
 	}
 	// noise01: panel 0…1. drive: 0…4 input multiply. Chaos fixed at face 0.0.
 	void process(const float in[2], float out[2], float freqNorm, float res, float noise01,
-	             float drive, float spread, Mode mode) {
+	             float drive, float spread, Mode mode, bool stereo = true) {
 		auto clampf = [](float v, float lo, float hi) { return v < lo ? lo : (v > hi ? hi : v); };
 		const float driveGain = clampf(drive, 0.f, 4.f);
-		const float spreadAmt = clampf(spread, -1.f, 1.f) * 0.15f;
-		for (int c = 0; c < 2; c++) {
+		const float spreadAmt = stereo ? clampf(spread, -1.f, 1.f) * 0.15f : 0.f;
+		const int nCh = stereo ? 2 : 1;
+		for (int c = 0; c < nCh; c++) {
 			float freqC = clampf(freqNorm + (c == 0 ? -spreadAmt : spreadAmt), 0.f, 1.f);
 			double x = double(in[c]) / 5.0 * double(driveGain);
 			double y = processSample(voice[c], x, double(freqC), double(clampf(res, 0.f, 1.f)),
@@ -341,6 +348,8 @@ struct Core {
 			if (!std::isfinite(v)) v = 0.f;
 			out[c] = v;
 		}
+		if (!stereo)
+			out[1] = out[0];
 	}
 };
 

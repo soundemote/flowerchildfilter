@@ -48,13 +48,13 @@ struct Case {
 int main() {
 	Case cases[] = {
 		{"lp18", fmd::super_love::MODE_LP18, 0.50f, 0.30f, 1.00f, 0.00f, 0x391098c35284d22bull},
-		{"lp24", fmd::super_love::MODE_LP24, 0.50f, 0.30f, 1.00f, 0.00f, 0x3d29591caf88fe96ull},
+		{"lp24", fmd::super_love::MODE_LP24, 0.50f, 0.30f, 1.00f, 0.00f, 0xa10d64e6d7a6361cull},
 		{"hp",   fmd::super_love::MODE_HP,   0.50f, 0.30f, 1.00f, 0.00f, 0x82df6614218d124aull},
 		{"bp",   fmd::super_love::MODE_BP,   0.50f, 0.30f, 1.00f, 0.00f, 0xa3a9fde1270bd6c1ull},
 		{"lp18-hires-drive", fmd::super_love::MODE_LP18, 0.72f, 0.85f, 2.50f, 0.40f, 0x49f548cb3a07a1a2ull},
 		{"hp-spread", fmd::super_love::MODE_HP, 0.35f, 0.10f, 0.80f, -0.70f, 0x6b8e489e6ce44751ull},
 		{"bp-hot", fmd::super_love::MODE_BP, 0.62f, 0.95f, 4.00f, 0.20f, 0x7e8f9da541d120bcull},
-		{"lp24-low", fmd::super_love::MODE_LP24, 0.12f, 0.00f, 0.50f, 0.00f, 0xd16fa417ed842602ull},
+		{"lp24-low", fmd::super_love::MODE_LP24, 0.12f, 0.00f, 0.50f, 0.00f, 0x8f25acdfd143f7e0ull},
 	};
 	const int n = int(sizeof(cases) / sizeof(cases[0]));
 	int fail = 0;
