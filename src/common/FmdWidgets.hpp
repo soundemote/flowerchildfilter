@@ -93,8 +93,7 @@ struct LayeredKnob : app::Knob {
 };
 
 
-/** The dark attenuverter trimmer, as printed on the Shaped Resonator and Super
-Love mockups. */
+/** Dark attenuverter trimmer: base, TURN, overlay, pointer (bottom to top). */
 struct FmdTrimmer : LayeredKnob {
 	FmdTrimmer();
 };
@@ -158,6 +157,7 @@ struct FmdModeSlider : app::SvgSlider {
 	float dragOldValue = NAN;
 	bool dragSlid = false;
 	float dragDist = 0.f;
+	float dragAccumX = 0.f;
 
 	FmdModeSlider();
 	void onDragStart(const DragStartEvent& e) override;

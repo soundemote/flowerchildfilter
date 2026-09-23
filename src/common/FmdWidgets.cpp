@@ -163,12 +163,12 @@ void LayeredKnob::onChange(const ChangeEvent& e) {
 
 
 FmdTrimmer::FmdTrimmer() {
-	// The separate KnobTrimmer-01-pointer asset is not stacked here: it is
-	// drawn on its own tiny page, so the offset that would place it away from
-	// the centre is lost. The turn layer already carries a visible indicator.
+	// KnobTrimmer 04 base, 03 TURN, 02 overlay, 01 pointer.
+	// Pointer sits on the TURN artboard: top edge = cap top at 12 o'clock.
 	addLayer("res/common/TrimmerDark-1-base.svg", false);
 	addLayer("res/common/TrimmerDark-2-turn.svg", true);
 	addLayer("res/common/TrimmerDark-3-overlay.svg", false);
+	addLayer("res/common/TrimmerDark-4-pointer.svg", true);
 }
 
 
@@ -315,6 +315,7 @@ void FmdModeSlider::onDragStart(const DragStartEvent& e) {
 	dragOldValue = pq ? pq->getValue() : NAN;
 	dragSlid = false;
 	dragDist = 0.f;
+	dragAccumX = 0.f;
 	ParamWidget::onDragStart(e);
 }
 
@@ -323,18 +324,22 @@ void FmdModeSlider::onDragMove(const DragMoveEvent& e) {
 	if (e.button != GLFW_MOUSE_BUTTON_LEFT)
 		return;
 
-	dragDist += e.mouseDelta.norm();
+	float zoom = getAbsoluteZoom();
+	if (zoom < 1e-6f)
+		zoom = 1.f;
+	dragDist += e.mouseDelta.norm() / zoom;
+	dragAccumX += e.mouseDelta.x / zoom;
 	const float clickPx = 8.f;
 	if (dragDist >= clickPx) {
 		dragSlid = true;
 		engine::ParamQuantity* pq = getParamQuantity();
-		if (pq && handle) {
-			math::Vec local = APP->scene->mousePos.minus(getAbsoluteOffset(math::Vec()));
-			float minX = minHandlePos.x + handle->box.size.x * 0.5f;
-			float maxX = maxHandlePos.x + handle->box.size.x * 0.5f;
-			float t = (maxX > minX) ? (local.x - minX) / (maxX - minX) : 0.f;
-			t = math::clamp(t, 0.f, 1.f);
-			pq->setValue(math::rescale(t, 0.f, 1.f, pq->getMinValue(), pq->getMaxValue()));
+		if (pq) {
+			float travel = maxHandlePos.x - minHandlePos.x;
+			if (travel < 1.f)
+				travel = 1.f;
+			float v = dragOldValue + dragAccumX / travel * (pq->getMaxValue() - pq->getMinValue());
+			v = math::clamp(v, pq->getMinValue(), pq->getMaxValue());
+			pq->setValue(std::round(v));
 		}
 	}
 	ParamWidget::onDragMove(e);
