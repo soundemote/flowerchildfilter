@@ -17,7 +17,7 @@ Superlove Filter uses a hand crafted "Phase-feedback wavetable" algorithm that r
 | **SPREAD** | Stereo frequency offset. |
 | **MODES** | LP18, LP24, HP, BP. |
 
-IN 1 only is mono (same signal on both outs). IN 1 and IN 2 is stereo. SPREAD applies in stereo. CLIP lights if driven input (jack × Drive) or output exceeds ±10 V.
+IN 1 only is mono (same signal on both outs). IN 1 and IN 2 is stereo. SPREAD applies in stereo. CLIP: driven input (jack × Drive) over ±10 V is 0.25 (blue); output over ±10 V is 1.0 (red); both clamp at 1.0.
 
 ## Audio Demos
 

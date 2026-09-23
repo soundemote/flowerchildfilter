@@ -229,8 +229,15 @@ struct SuperLove : Module {
 
 		const float peakIn = std::max(std::fabs(in[0]), std::fabs(in[1])) * drive;
 		const float peakOut = std::max(std::fabs(out[0]), std::fabs(out[1]));
-		if (std::max(peakIn, peakOut) > clipLightThresh) {
-			clipLightEnv = 1.f;
+		float clipAmt = 0.f;
+		if (peakIn > clipLightThresh)
+			clipAmt += 0.25f;
+		if (peakOut > clipLightThresh)
+			clipAmt += 1.f;
+		if (clipAmt > 1.f)
+			clipAmt = 1.f;
+		if (clipAmt > 0.f) {
+			clipLightEnv = clipAmt;
 		} else if (clipLightEnv > 0.f) {
 			clipLightEnv -= args.sampleTime / clipLightSlewSec;
 			if (clipLightEnv < 0.f)
