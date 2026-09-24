@@ -34,6 +34,42 @@ void PngPanel::setImagePath(const std::string& path) {
 }
 
 
+void PngPanel::setLodLevels(std::vector<LodLevel> levels) {
+	lodLevels = std::move(levels);
+	lodIndex = -1;
+	// Apply the current zoom immediately so the first frame is not the wrong LOD.
+	step();
+}
+
+
+void PngPanel::step() {
+	Widget::step();
+	if (lodLevels.empty())
+		return;
+
+	float zoom = getAbsoluteZoom();
+	if (!(zoom > 0.f))
+		zoom = 1.f;
+	float dpr = APP->window ? APP->window->pixelRatio : 1.f;
+	if (!(dpr > 0.f))
+		dpr = 1.f;
+	float needPx = PANEL_H * zoom * dpr;
+
+	// Smallest level that covers needPx; otherwise the largest.
+	int best = int(lodLevels.size()) - 1;
+	for (int i = 0; i < int(lodLevels.size()); i++) {
+		if (lodLevels[i].heightPx + 0.5f >= needPx) {
+			best = i;
+			break;
+		}
+	}
+	if (best == lodIndex)
+		return;
+	lodIndex = best;
+	setImagePath(lodLevels[best].path);
+}
+
+
 void PngPanel::draw(const DrawArgs& args) {
 	if (!image && !path.empty())
 		image = APP->window->loadImage(path);
@@ -157,12 +193,12 @@ void LayeredKnob::onChange(const ChangeEvent& e) {
 
 
 FmdTrimmer::FmdTrimmer() {
-	// KnobTrimmer 04 base, 03 TURN, 02 overlay, 01 pointer.
-	// Pointer sits on the TURN artboard: top edge = cap top at 12 o'clock.
+	// KnobTrimmer layers bottom→top: base, TURN, pointer, overlay.
+	// Overlay stays static on top; pointer + TURN rotate together.
 	addLayer("res/common/TrimmerDark-1-base.svg", false);
 	addLayer("res/common/TrimmerDark-2-turn.svg", true);
-	addLayer("res/common/TrimmerDark-3-overlay.svg", false);
 	addLayer("res/common/TrimmerDark-4-pointer.svg", true);
+	addLayer("res/common/TrimmerDark-3-overlay.svg", false);
 }
 
 

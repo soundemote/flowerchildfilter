@@ -10,6 +10,9 @@ SOURCES += src/modules/SuperLove/SuperLove.cpp
 # Dist zip: SuperLove assets only (Flower Child / Shaped Resonator stay in git).
 DISTRIBUTABLES += res/common
 DISTRIBUTABLES += res/SuperLove
+DISTRIBUTABLES += res/panels/SuperLove-380.png
+DISTRIBUTABLES += res/panels/SuperLove-950.png
+DISTRIBUTABLES += res/panels/SuperLove-1520.png
 DISTRIBUTABLES += res/panels/SuperLove.png
 DISTRIBUTABLES += res/labels/SuperLove.svg
 DISTRIBUTABLES += LICENSE-VCV.md

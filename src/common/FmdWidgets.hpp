@@ -34,15 +34,33 @@ static const float KNOB_MAX_ANGLE = 0.83f * float(M_PI);
 
 Rack's SvgPanel only accepts SVG, but the FMD panels are PNG exports (the
 artwork uses soft shadows and layered gradients that nanosvg cannot reproduce),
-so the image is drawn straight into the module rect. */
+so the image is drawn straight into the module rect.
+
+Optional zoom LODs: each level is a PNG tagged by its design height in rack
+pixels (e.g. 380 / 950 / 1520). `step()` picks the smallest level whose height
+covers `PANEL_H * getAbsoluteZoom() * pixelRatio`. */
 struct PngPanel : widget::Widget {
+	struct LodLevel {
+		/** Design height in rack px (from the filename tag). */
+		float heightPx;
+		std::string path;
+		LodLevel() : heightPx(PANEL_H) {}
+		LodLevel(float heightPx, std::string path) : heightPx(heightPx), path(std::move(path)) {}
+	};
+
 	std::string path;
 	std::shared_ptr<window::Image> image;
 	app::PanelBorder* panelBorder;
+	std::vector<LodLevel> lodLevels;
+	int lodIndex = -1;
 
 	PngPanel(const std::string& path = "");
-	/** Swaps the artwork. Cheap to call every frame with an unchanged path. */
+	/** Swaps the artwork. Cheap to call every frame with an unchanged path.
+	Does not clear LOD levels — Flower Child uses this for variant swaps. */
 	void setImagePath(const std::string& path);
+	/** Absolute plugin paths, sorted ascending by heightPx. Enables zoom LOD. */
+	void setLodLevels(std::vector<LodLevel> levels);
+	void step() override;
 	void draw(const DrawArgs& args) override;
 };
 
@@ -92,7 +110,7 @@ struct LayeredKnob : app::Knob {
 };
 
 
-/** Dark attenuverter trimmer: base, TURN, overlay, pointer (bottom to top). */
+/** Dark attenuverter trimmer: base, TURN, pointer, overlay (bottom to top). */
 struct FmdTrimmer : LayeredKnob {
 	FmdTrimmer();
 };

@@ -292,7 +292,13 @@ struct ClipLed : GrayModuleLightWidget {
 struct SuperLoveWidget : ModuleWidget {
 	SuperLoveWidget(SuperLove* module) {
 		setModule(module);
-		setPanel(new fmd::PngPanel(asset::plugin(pluginInstance, "res/panels/SuperLove.png")));
+		fmd::PngPanel* pngPanel = new fmd::PngPanel();
+		std::vector<fmd::PngPanel::LodLevel> lods;
+		lods.push_back(fmd::PngPanel::LodLevel{380.f, asset::plugin(pluginInstance, "res/panels/SuperLove-380.png")});
+		lods.push_back(fmd::PngPanel::LodLevel{950.f, asset::plugin(pluginInstance, "res/panels/SuperLove-950.png")});
+		lods.push_back(fmd::PngPanel::LodLevel{1520.f, asset::plugin(pluginInstance, "res/panels/SuperLove-1520.png")});
+		pngPanel->setLodLevels(std::move(lods));
+		setPanel(pngPanel);
 		addChild(new fmd::PanelLabels("res/labels/SuperLove.svg"));
 
 		// -- NOISE / DRIVE and their attenuverters --------------------------

@@ -44,7 +44,7 @@ CONTROLS = [
     ("common/KnobTrimmer-04-base.svg",      "common/TrimmerDark-1-base.svg",    20.0, 0),
     ("common/KnobTrimmer-03-TURN.svg",      "common/TrimmerDark-2-turn.svg",    18.9, 0),
     ("common/KnobTrimmer-02-overlay.svg",   "common/TrimmerDark-3-overlay.svg", 18.0, 0),
-    ("common/KnobTrimmer-01-pointer.svg",   "common/TrimmerDark-4-pointer.svg",  1.7, 0),
+    ("common/KnobTrimmer-01-pointer.svg",   "common/TrimmerDark-4-pointer.svg", 18.9, 0),
 
     # -- Flower Child -------------------------------------------------------
     ("Flower Child/Controls/KnobBigMoog-06-base.svg",       "FlowerChild/KnobBig-1-base.svg",      62.0, 0),
@@ -384,6 +384,32 @@ def view_box(tag):
     return (0.0, 0.0, float(w.group(1)), float(h.group(1)))
 
 
+
+def convert_pointer(src_path, dst_path, turn_vb=24.09, target_w=18.9):
+    """Pad the cropped pointer onto the TURN square so centering hits 12 o'clock."""
+    with open(src_path, encoding="utf-8", errors="replace") as f:
+        raw = f.read()
+    m = SVG_TAG.search(raw)
+    if not m:
+        raise ValueError("no <svg> element")
+    x0, y0, vw, vh = view_box(m.group(0))
+    body = inline_css(strip_clip_paths(raw[m.end():raw.rindex("</svg>")]))
+    tx = (turn_vb - vw) / 2.0 - x0
+    ty = 0.0 - y0
+    ns = 'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"'
+    out = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<svg %s\n'
+        '     width="%g" height="%g" viewBox="0 0 %g %g">'
+        '<g transform="translate(%g,%g)">%s</g></svg>\n'
+        % (ns, target_w, target_w, turn_vb, turn_vb, tx, ty, body)
+    )
+    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+    with open(dst_path, "w", encoding="utf-8") as f:
+        f.write(out)
+    return turn_vb, turn_vb, target_w, target_w
+
+
 def convert(src_path, dst_path, target_w, rotate):
     with open(src_path, encoding="utf-8", errors="replace") as f:
         raw = f.read()
@@ -442,7 +468,10 @@ def main():
             errors += 1
             continue
         try:
-            ow, oh, nwv, nhv = convert(s, d, tw, rot)
+            if dst.replace("\\", "/").endswith("TrimmerDark-4-pointer.svg"):
+                ow, oh, nwv, nhv = convert_pointer(s, d, 24.09, tw)
+            else:
+                ow, oh, nwv, nhv = convert(s, d, tw, rot)
             print("  %-34s %7.2fx%-7.2f -> %6.2fx%-6.2f%s" % (dst, ow, oh, nwv, nhv, "  (rot 90)" if rot else ""))
         except Exception as exc:  # noqa: BLE001 - report and keep going
             print("  FAILED   %s: %s" % (src, exc))
