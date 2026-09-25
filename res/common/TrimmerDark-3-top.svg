@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:affinity="https://www.affinity.studio/" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="20" height="20" viewBox="0 0 109 109"><defs>
+        <linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,63.5,-63.5,0,54.1665,38.5208)"><stop offset="0" stop-color="black" stop-opacity="0"/><stop offset="1" stop-color="black" stop-opacity="0.7"/></linearGradient>
+        <linearGradient id="_Linear2" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,-42.75,42.75,0,54.1665,54.9792)"><stop offset="0" stop-color="rgb(41,41,43)" stop-opacity="1"/><stop offset="1" stop-color="rgb(107,107,107)" stop-opacity="1"/></linearGradient>
+    </defs>
+    <rect id="_01-top" affinity:id="01-top" x="0" y="0" width="108.333" height="108.333" fill="none"/>
+    <g id="top" transform="matrix(1,0,0,1,0.312,0.521)">
+        <path d="M8.875,38.438C7.137,43.469 6.25,48.756 6.25,54.079C6.25,80.365 27.88,101.996 54.167,101.996C80.453,101.996 102.083,80.365 102.083,54.079C102.083,49.109 101.31,44.17 99.792,39.438C94.083,38.438 19.083,38.438 8.875,38.438Z" fill="url(#_Linear1)" fill-rule="nonzero"/>
+        <g transform="matrix(1,0,0,1,0.125498,-0.1875)">
+            <path d="M54.167,15.104C75.982,15.437 93.833,33.289 94.167,55.104L94.167,53.646C94.489,31.329 76.4,12.695 54.083,12.354C31.972,12.669 13.954,30.945 13.954,53.058C13.954,53.254 13.955,53.45 13.958,53.646L13.958,55.104C14.294,33.211 32.272,15.326 54.167,15.104Z" fill="url(#_Linear2)" fill-rule="nonzero"/>
+            <path d="M54.167,93.104C75.936,92.773 93.767,74.997 94.167,53.229L94.167,54.646C94.17,54.856 94.171,55.066 94.171,55.276C94.171,77.373 76.178,95.643 54.083,95.979C31.743,95.639 13.636,76.986 13.958,54.646L13.958,53.229C14.382,75.066 32.327,92.862 54.167,93.104Z" fill="rgb(13,13,13)" fill-rule="nonzero"/>
+        </g>
+        <path id="ref" d="M54.188,3.979C26.759,3.979 4.188,26.55 4.188,53.979C4.188,81.408 26.759,103.979 54.188,103.979C81.538,103.979 104.074,81.538 104.188,54.188L104.188,53.979C104.188,26.55 81.617,3.979 54.188,3.979Z" fill="none"/>
+    </g>
+    
+</svg>

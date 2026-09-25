@@ -41,10 +41,10 @@ CONTROLS = [
     ("common/KnobTrimmer-bright-02-turn.svg",    "common/Trimmer-2-turn.svg",    20.0, 0),
     ("common/KnobTrimmer-bright-01-overlay.svg", "common/Trimmer-3-overlay.svg", 20.0, 0),
     # dark variant of the trimmer, kept for reference / easy swapping
-    ("common/KnobTrimmer-04-base.svg",      "common/TrimmerDark-1-base.svg",    20.0, 0),
-    ("common/KnobTrimmer-03-TURN.svg",      "common/TrimmerDark-2-turn.svg",    18.9, 0),
-    ("common/KnobTrimmer-02-overlay.svg",   "common/TrimmerDark-3-overlay.svg", 18.0, 0),
-    ("common/KnobTrimmer-01-pointer.svg",   "common/TrimmerDark-4-pointer.svg", 18.9, 0),
+    ("common/KnobTrimmer-01-base.svg",      "common/TrimmerDark-1-base.svg",    20.0, 0),
+    ("common/KnobTrimmer-02-body.svg",      "common/TrimmerDark-2-body.svg",    20.0, 0),
+    ("common/KnobTrimmer-03-top.svg",       "common/TrimmerDark-3-top.svg",     20.0, 0),
+    ("common/KnobTrimmer-04-line.svg",      "common/TrimmerDark-4-line.svg",    20.0, 0),
 
     # -- Flower Child -------------------------------------------------------
     ("Flower Child/Controls/KnobBigMoog-06-base.svg",       "FlowerChild/KnobBig-1-base.svg",      62.0, 0),
@@ -370,6 +370,45 @@ def inline_css(body):
     return ELEMENT.sub(rewrite, body)
 
 
+# nanosvg reads fill/stop-color as attributes. Affinity puts them in style="",
+# so url(#gradient) fills never paint. Promote known paint props to attributes.
+STYLE_TO_ATTR = ("fill", "fill-rule", "fill-opacity", "stroke", "stroke-width",
+                 "stop-color", "stop-opacity", "opacity")
+DEFS_EL = re.compile(r"<defs\b.*?</defs\s*>", re.S | re.I)
+
+
+def expand_style_to_attrs(body):
+    def rewrite(match):
+        tag, attrs, closing = match.groups()
+        found = STYLE_ATTR.search(attrs)
+        if not found:
+            return match.group(0)
+        decls = dict(_split_decls(found.group(1)))
+        keep = []
+        extra = ""
+        for key, value in decls.items():
+            if key in STYLE_TO_ATTR:
+                extra += ' %s="%s"' % (key, value)
+            else:
+                keep.append("%s:%s" % (key, value))
+        if keep:
+            style = ' style="%s"' % ";".join(keep)
+        else:
+            style = ""
+        attrs = attrs[:found.start()] + style + extra + attrs[found.end():]
+        return "<%s%s%s>" % (tag, attrs, closing)
+
+    return ELEMENT.sub(rewrite, body)
+
+
+def defs_first(body):
+    blocks = DEFS_EL.findall(body)
+    if not blocks:
+        return body
+    body = DEFS_EL.sub("", body)
+    return "".join(blocks) + body
+
+
 def view_box(tag):
     """Return (x, y, w, h) of the source coordinate space."""
     m = re.search(r'viewBox\s*=\s*"([^"]+)"', tag, re.I)
@@ -418,7 +457,7 @@ def convert(src_path, dst_path, target_w, rotate):
     if not m:
         raise ValueError("no <svg> element")
     x0, y0, vw, vh = view_box(m.group(0))
-    body = inline_css(strip_clip_paths(raw[m.end():raw.rindex("</svg>")]))
+    body = defs_first(expand_style_to_attrs(inline_css(strip_clip_paths(raw[m.end():raw.rindex("</svg>")]))))
 
     if rotate == 90:
         # (x, y) -> (vh - y, x): swaps the page dimensions.
@@ -468,10 +507,7 @@ def main():
             errors += 1
             continue
         try:
-            if dst.replace("\\", "/").endswith("TrimmerDark-4-pointer.svg"):
-                ow, oh, nwv, nhv = convert_pointer(s, d, 24.09, tw)
-            else:
-                ow, oh, nwv, nhv = convert(s, d, tw, rot)
+            ow, oh, nwv, nhv = convert(s, d, tw, rot)
             print("  %-34s %7.2fx%-7.2f -> %6.2fx%-6.2f%s" % (dst, ow, oh, nwv, nhv, "  (rot 90)" if rot else ""))
         except Exception as exc:  # noqa: BLE001 - report and keep going
             print("  FAILED   %s: %s" % (src, exc))

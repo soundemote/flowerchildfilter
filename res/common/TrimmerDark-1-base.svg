@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="20" height="20" viewBox="0 0 25.51 25.51">
-  <defs>
-    <linearGradient id="linear-gradient" x1="12.76" y1="25.51" x2="12.76" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-opacity="0"/>
-      <stop offset="1"/>
-    </linearGradient>
-    <linearGradient id="linear-gradient-2" x1="12.76" y1="1.26" x2="12.76" y2="24.26" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#858585"/>
-      <stop offset="1" stop-color="#242424"/>
-    </linearGradient>
-  </defs>
-  <circle id="bevel" cx="12.76" cy="12.76" r="12.76" opacity="0.4" fill="url(#linear-gradient)"/>
-  <ellipse cx="12.76" cy="12.76" rx="11.59" ry="11.5" fill="url(#linear-gradient-2)"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:affinity="https://www.affinity.studio/" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="20" height="20" viewBox="0 0 20 20"><defs>
+        <linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,-106.292,106.292,0,56.5005,107.625)"><stop offset="0" stop-color="black" stop-opacity="0"/><stop offset="1" stop-color="black" stop-opacity="0.4"/></linearGradient>
+        <linearGradient id="_Linear2" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,96.599294,-96.599294,0,56.5005,6.2)"><stop offset="0" stop-color="rgb(133,133,133)" stop-opacity="1"/><stop offset="1" stop-color="rgb(36,36,36)" stop-opacity="1"/></linearGradient>
+    </defs>
+    <g id="_03-base" affinity:id="03-base" transform="matrix(0.176991,0,0,0.176991,0,0.353982)">
+        <rect x="0.029" y="0" width="108.333" height="108.333" fill="none"/>
+    </g>
+    <g id="base" transform="matrix(0.176991,0,0,0.176991,0,0.353982)">
+        <g id="bevel">
+            <circle cx="56.5" cy="54.5" r="53.167" fill="url(#_Linear1)"/>
+        </g>
+        <g>
+            <ellipse cx="56.5" cy="54.5" rx="48.292" ry="48.3" fill="url(#_Linear2)"/>
+        </g>
+    </g>
+    
 </svg>

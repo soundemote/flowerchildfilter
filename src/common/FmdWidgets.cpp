@@ -193,12 +193,11 @@ void LayeredKnob::onChange(const ChangeEvent& e) {
 
 
 FmdTrimmer::FmdTrimmer() {
-	// KnobTrimmer layers bottom→top: base, TURN, pointer, overlay.
-	// Overlay stays static on top; pointer + TURN rotate together.
+	// 01 base, 02 body (rotates), 03 top, 04 line (rotates).
 	addLayer("res/common/TrimmerDark-1-base.svg", false);
-	addLayer("res/common/TrimmerDark-2-turn.svg", true);
-	addLayer("res/common/TrimmerDark-4-pointer.svg", true);
-	addLayer("res/common/TrimmerDark-3-overlay.svg", false);
+	addLayer("res/common/TrimmerDark-2-body.svg", true);
+	addLayer("res/common/TrimmerDark-3-top.svg", false);
+	addLayer("res/common/TrimmerDark-4-line.svg", true);
 }
 
 

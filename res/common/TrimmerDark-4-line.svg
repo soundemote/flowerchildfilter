@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:affinity="https://www.affinity.studio/" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="20" height="20" viewBox="0 0 24 24">
+    <rect id="Artboard1" x="0" y="0" width="24" height="24" fill="none"/>
+    <g id="Artboard11" affinity:id="Artboard1">
+        <g id="line" transform="matrix(0.183486,0,0,0.183486,2.057248,2.279083)">
+            <rect x="49.569" y="8.057" width="9.196" height="6.221" fill="rgb(173,173,173)"/>
+            <path d="M56.81,41.657L51.523,41.657C50.444,41.657 49.569,40.782 49.569,39.703L49.569,14.278L58.764,14.278L58.764,39.703C58.764,40.782 57.889,41.657 56.81,41.657" fill="rgb(219,219,219)" fill-rule="nonzero"/>
+        </g>
+        <g id="ref" transform="matrix(0.183486,0,0,0.183486,2.057248,2.095596)">
+            <path d="M54.188,3.979C26.759,3.979 4.188,26.55 4.188,53.979C4.188,81.408 26.759,103.979 54.188,103.979C81.538,103.979 104.074,81.538 104.188,54.188L104.188,53.979C104.188,26.55 81.617,3.979 54.188,3.979Z" fill="none" fill-rule="nonzero"/>
+        </g>
+    </g>
+</svg>
