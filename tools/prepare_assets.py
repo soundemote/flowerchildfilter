@@ -44,7 +44,7 @@ CONTROLS = [
     ("common/KnobTrimmer-01-base.svg",      "common/TrimmerDark-1-base.svg",    20.0, 0),
     ("common/KnobTrimmer-02-body.svg",      "common/TrimmerDark-2-body.svg",    20.0, 0),
     ("common/KnobTrimmer-03-top.svg",       "common/TrimmerDark-3-top.svg",     20.0, 0),
-    ("common/KnobTrimmer-04-line.svg",      "common/TrimmerDark-4-line.svg",    20.0, 0),
+    ("common/KnobTrimmer-04-line.svg",      "common/TrimmerDark-4-line.svg",    24.5, 0),
 
     # -- Flower Child -------------------------------------------------------
     ("Flower Child/Controls/KnobBigMoog-06-base.svg",       "FlowerChild/KnobBig-1-base.svg",      62.0, 0),
