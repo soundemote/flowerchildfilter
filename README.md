@@ -22,6 +22,7 @@ IN 1 only is mono (same signal on both outs). IN 1 and IN 2 is stereo. SPREAD ap
 ## Audio Demos
 
 * https://youtu.be/36fkv5bXsv0 Bandpass filter max resonance
+* https://youtu.be/0YeF2PfKqDg Highpass filter various settings
 
 ## Building
 
